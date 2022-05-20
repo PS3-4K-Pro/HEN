@@ -46,19 +46,14 @@ A exploit that allows the console to run unsigned code.<br>
  
  ### Payload:
 -Added: Dump PSID option to HFW tools.<br>
+
+### Resources:
 -Added: Toggle automatic update option to HFW tools.<br>
 -Added: New icons for updated HFW tools options. (Thanks @xps3riments)<br>
 -Updated: Text on theme selector in HFW tools.<br>
 -Updated: RCO files to fix display issues with 4.89 only. (Thanks sandungas<br>
 -Updated: layout_grid_table files for 480p and 272p to fix display issues in Remote Play with 4.89 only. (Thanks @sandungas)<br>
  
-### Payload:
--Added: HEN enabled icon.<br>
--Added: IP address on XMB™.<br>
--Added: Custom what's new items.<br>
--Added: Gameboot sound.<br>
--Added: System Update Unlock after HEN is enabled.<br>
-
 # v3.0.3
 ### Global:
 -Added: Support for Firmware 4.88.<br>
