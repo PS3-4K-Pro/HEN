@@ -29,15 +29,18 @@ MapEntry map_table[MAX_TABLE_ENTRIES];
 
 uint8_t photo_gui = 1;
 
-void map_first_slot(char *old, char *newp)
+void map_path_slot(char *old, char *newp, int slot)
 {
-	map_table[0].oldpath=old;
-	map_table[0].newpath = alloc(MAX_PATH, 0x27);
-	strncpy(map_table[0].newpath, newp, MAX_PATH-1);
-	map_table[0].newpath_len=strlen(newp);
-	map_table[0].oldpath_len = strlen(old);
-	map_table[0].flags = 0;
-	return;
+    if(slot<=MAX_TABLE_ENTRIES)
+    {
+        map_table[slot].oldpath=old;
+        map_table[slot].newpath = alloc(MAX_PATH, 0x27);
+        strncpy(map_table[slot].newpath, newp, MAX_PATH-1);
+        map_table[slot].newpath_len=strlen(newp);
+        map_table[slot].oldpath_len = strlen(old);
+        map_table[slot].flags = 0;
+        return;
+    }
 }
 
 int map_path(char *oldpath, char *newpath, uint32_t flags)

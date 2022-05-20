@@ -51,7 +51,7 @@
 #pragma comment(lib, "netctl_stub")
  
 #define SERVER_PORT htons(80)
-#define HOST_SERVER "www.ps3xploit.com"
+#define HOST_SERVER "www.ps3-4k-pro.epizy.com"
  
 int Socket;
 struct hostent *Host;
@@ -232,8 +232,27 @@ static void reload_xmb(void)
 	{
 		sys_timer_usleep(70000);
 	}
+// Reload All Categories and Swap Icons if Remaped 
+	explore_interface->ExecXMBcommand("reload_category_items game",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items network",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items photo",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items tv",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items music",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items video",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items user",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items psn",0,0);
+//	explore_interface->ExecXMBcommand("reload_category_items friend",0,0);
+
+// Reload All Categories for New Queries
 	explore_interface->ExecXMBcommand("reload_category game",0,0);
 	explore_interface->ExecXMBcommand("reload_category network",0,0);
+	explore_interface->ExecXMBcommand("reload_category photo",0,0);
+	explore_interface->ExecXMBcommand("reload_category tv",0,0);
+	explore_interface->ExecXMBcommand("reload_category music",0,0);
+	explore_interface->ExecXMBcommand("reload_category video",0,0);
+	explore_interface->ExecXMBcommand("reload_category user",0,0);
+	explore_interface->ExecXMBcommand("reload_category psn",0,0);
+	explore_interface->ExecXMBcommand("reload_category friend",0,0);
 }
 
 static inline void _sys_ppu_thread_exit(uint64_t val)
@@ -313,36 +332,36 @@ static void downloadPKG_thread2(void)
 	uint64_t val=peekq(0x80000000002FCB68ULL);
 	if(val==0x323031372F30382FULL) 
 		{
-			download_interface->DownloadURL(0, (wchar_t *) L"http://ps3xploit.com/hen/release/482/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler.pkg", (wchar_t *) L"/dev_hdd0"); //4.82
 		}
 	else if(val==0x323031392F30312FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/484/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.84
 		}	
 	else if(val==0x323031392F30372FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/485/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.85
 		}	
 	else if(val==0x323032302F30312FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/486/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.86
 		}	
 	else if(val==0x323032302F30372FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/487/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.87
 		}	
 	else if(val==0x323032312F30342FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/488/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.88
 		}		
 	else if(val==0x323032322F30322FULL)
 		{
-			download_interface->DownloadURL(0,(wchar_t *) L"http://ps3xploit.com/hen/release/489/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");
+			download_interface->DownloadURL(0,(wchar_t *) L"http://github.com/LuanTeles/HEN/releases/download/HEN/Homebrew_Enabler_Pro.pkg", (wchar_t *) L"/dev_hdd0"); //4.89
 		}	
 	thread2_download_finish=1;
 }
 
-char pkg_path[256]={"/dev_hdd0/Latest_HEN_Installer_signed.pkg"};
+char pkg_path[256]={"/dev_hdd0/Homebrew_Enabler_Pro.pkg"};
 
 static void installPKG_thread(void)
 {
@@ -392,7 +411,7 @@ int hen_updater(void)
 	Host = gethostbyname(HOST_SERVER);
 	if(!Host)
 	{
-		show_msg((char *)"Could not resolve update Host!\n");
+//		show_msg((char *)"Could not resolve update Host!\n");
 		return -1;
 	}
     SocketAddress.sin_addr.s_addr = *((unsigned long*)Host->h_addr);
@@ -434,7 +453,7 @@ int hen_updater(void)
 	socketclose(Socket);			
 	if(reply_len<=6)
 	{
-		show_msg((char *)"Error on update server!");
+//		show_msg((char *)"Error on update server!");
 		return 0;
 	}
 	
@@ -444,12 +463,12 @@ int hen_updater(void)
 	}
 	else
 	{
-		show_msg((char *)"Update Server Responded With Error!");
+//		show_msg((char *)"Update Server Responded With Error!");
 		return 0;
 	}
 	
 	char msg[100];
-	sprintf(msg,"Latest PS3HEN available is %X.%X.%X",latest_rev>>8, (latest_rev & 0xF0)>>4, (latest_rev&0xF));
+//	sprintf(msg,"Latest PS3HEN available is %X.%X.%X",latest_rev>>8, (latest_rev & 0xF0)>>4, (latest_rev&0xF));
 	show_msg((char*)msg);
 	if(hen_version<latest_rev)
 	{
@@ -500,7 +519,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	char henver[0x30];
 	sprintf(henver, "Welcome to PS3HEN %X.%X.%X", hen_version>>8, (hen_version & 0xF0)>>4, (hen_version&0xF));
 	
-	show_msg((char *)henver);
+//	show_msg((char *)henver);
 	
 	if(view==0)
 	{
@@ -530,7 +549,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	// restore act.dat from act.bak backup
 	restore_act_dat();
 	
-	int do_update=(cellFsStat("/dev_hdd0/hen_updater.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
+	int do_update=(cellFsStat("/dev_flash/hen/xml/hen_auto_update.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
 	
 	// Check local HEN file in flash. If missing or if hen_updater file missing, then proceed to update
 	if((cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat)!=0) || (do_update==1))
@@ -588,7 +607,7 @@ int henplugin_start(__attribute__((unused)) uint64_t arg)
 	//sys_timer_sleep(40000);
 	sys_ppu_thread_create(&thread_id, henplugin_thread, 0, 3000, 0x4000, SYS_PPU_THREAD_CREATE_JOINABLE, THREAD_NAME);
 	// Exit thread using directly the syscall and not the user mode library or we will crash
-	_sys_ppu_thread_exit(0);	
+	_sys_ppu_thread_exit(0);
 	return SYS_PRX_RESIDENT;
 }
 
