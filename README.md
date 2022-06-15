@@ -38,7 +38,7 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: System Update Unlock after HEN is enabled.<br>
 
 # v3.1.1
-###Resources:
+### Resources:
 -Added: CEX Version of explore_plugin.sprx.<br>
 -Removed: Unused RCO files.<br>
 -Fixed: Display issues with Trophies, Package Manager and other XMB items.<br>
