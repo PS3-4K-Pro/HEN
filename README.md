@@ -26,7 +26,7 @@ A exploit that allows the console to run unsigned code.<br>
  
 <details><summary>Spoiler</summary>
 
-# v3.1.1
+# v3.1.2
 ### Plugin:
 -Removed: Version notification.<br>
 
@@ -34,9 +34,15 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: HEN enabled icon.<br>
 -Added: IP address on XMB™.<br>
 -Added: Custom what's new items.<br>
--Added: Gameboot sound.<br>
+-Added: Gameboot logo & sound.<br>
 -Added: System Update Unlock after HEN is enabled.<br>
- 
+
+# v3.1.1
+###Resources:
+-Added: CEX Version of explore_plugin.sprx.<br>
+-Removed: Unused RCO files.<br>
+-Fixed: Display issues with Trophies, Package Manager and other XMB items.<br>
+
 # v3.1.0
 ### Global:
 -Added: Support for Firmware 4.88.<br>
