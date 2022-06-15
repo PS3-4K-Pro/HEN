@@ -35,7 +35,7 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: IP address on XMB™.<br>
 -Added: Custom what's new items.<br>
 -Added: Gameboot logo & sound.<br>
--Added: System Update Unlock after HEN is enabled.<br>
+-Added: System update unlock after HEN is enabled.<br>
 
 # v3.1.1
 ### Resources:
