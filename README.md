@@ -12,11 +12,11 @@ A exploit that allows the console to run unsigned code.<br>
 
 |HEN™ 4K Pro|
 |----------------------
-| Custom What's New items |
-| Custom PlayStation™Store (Video/Game/PSN) Shortcut items |
-| HEN Icon changes when Enabled |
-| IP Adress on XMB™ |
-| Gameboot Sound Enabled |
+| Custom what's new items |
+| Custom PlayStation™Store (Video/Game/PSN) shortcut items |
+| HEN icon changes when enabled |
+| IP adress on XMB™ |
+| Gameboot logo & sound enabled |
 
 <br>
 
