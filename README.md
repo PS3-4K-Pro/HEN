@@ -3,7 +3,7 @@
 # Homebrew Enabler Pro™
 A exploit that allows the console to run unsigned code.<br>
 
-[![Github downloads (by repository)](https://img.shields.io/github/downloads/LuanTeles/HEN/total?style=social)](https://github.com/LuanTeles/HEN/releases/)
+[![Github downloads (by repository)](https://img.shields.io/github/downloads/PS3-4K-Pro/HEN/total?style=social)](https://github.com/PS3-4K-Pro/HEN/releases/)
 
 ![Hen Disabled](https://user-images.githubusercontent.com/74815634/148464759-62bed1d8-b944-411a-b9f5-209a5d73b1b4.png)
 ![Hen Enabled](https://user-images.githubusercontent.com/74815634/148464786-72e35270-5e68-4abd-996f-10fb53713dda.png)
