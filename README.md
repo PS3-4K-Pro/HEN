@@ -3,7 +3,7 @@
 # Homebrew Enabler Pro™
 A exploit that allows the console to run unsigned code.<br>
 
-[![Github downloads (by repository)](https://img.shields.io/github/downloads/PS3-4K-Pro/HEN/total?style=social)](https://github.com/PS3-4K-Pro/HEN/releases/)
+[![Github downloads (by repository)](https://img.shields.io/github/downloads/LuanTeles/HEN/total?style=social)](https://github.com/LuanTeles/HEN/releases/)
 
 ![Hen Disabled](https://user-images.githubusercontent.com/74815634/148464759-62bed1d8-b944-411a-b9f5-209a5d73b1b4.png)
 ![Hen Enabled](https://user-images.githubusercontent.com/74815634/148464786-72e35270-5e68-4abd-996f-10fb53713dda.png)
@@ -12,11 +12,11 @@ A exploit that allows the console to run unsigned code.<br>
 
 |HEN™ 4K Pro|
 |----------------------
-| Custom What's New items |
-| Custom PlayStation™Store (Video/Game/PSN) Shortcut items |
-| HEN Icon changes when Enabled |
-| IP Adress on XMB™ |
-| Gameboot Sound Enabled |
+| Custom what's new items |
+| Custom PlayStation™Store (Video/Game/PSN) shortcut items |
+| HEN icon changes when enabled |
+| IP adress on XMB™ |
+| Gameboot logo & sound enabled |
 
 <br>
 
@@ -26,7 +26,7 @@ A exploit that allows the console to run unsigned code.<br>
  
 <details><summary>Spoiler</summary>
 
-# v3.1.1
+# v3.1.2
 ### Plugin:
 -Removed: Version notification.<br>
 
@@ -34,9 +34,15 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: HEN enabled icon.<br>
 -Added: IP address on XMB™.<br>
 -Added: Custom what's new items.<br>
--Added: Gameboot sound.<br>
--Added: System Update Unlock after HEN is enabled.<br>
- 
+-Added: Gameboot logo & sound.<br>
+-Added: System update unlock after HEN is enabled.<br>
+
+# v3.1.1
+### Resources:
+-Added: CEX Version of explore_plugin.sprx.<br>
+-Removed: Unused RCO files.<br>
+-Fixed: Display issues with Trophies, Package Manager and other XMB items.<br>
+
 # v3.1.0
 ### Global:
 -Added: Support for Firmware 4.88.<br>

@@ -41,7 +41,7 @@
 #define elf_patch6_download				0x4E624
 
 /* autodownload_plugin */
-#define elf_patch1_autodownload                0x82650
+#define elf_patch1_autodownload                0x82650  
 #define elf_patch2_autodownload                0x82658
 
 /*Cinavia patch*/
@@ -188,7 +188,7 @@
 #define elf_patch6_download				0x4E624
 
 /* autodownload_plugin */
-#define elf_patch1_autodownload                0x82650
+#define elf_patch1_autodownload                0x82650  
 #define elf_patch2_autodownload                0x82658
 
 /*Cinavia patch*/
@@ -309,7 +309,7 @@
 #define NAS_PLUGIN_HASH					0xc50d000000020000
 #define BDP_BDMV_HASH					0xcc28700000370000 // Not present in DEX
 #define BDP_BDVD_HASH					0xcc28d00000430000 // Not present in DEX
-#define DOWNLOAD_PLUGIN_HASH			0xcc26800000020000
+#define DOWNLOAD_PLUGIN_HASH			0xcc26800000020000 
 #define AUTODOWNLOAD_PLUGIN_HASH		0x6a1af00000040000
 #define PREMO_PLUGIN_HASH				0x1000000000010000
 #define PREMO_GAME_PLUGIN_HASH			0x5bc3000000010000
@@ -329,7 +329,7 @@
 #define elf_patch1_download				0x42DC0 // 0x42e2c
 #define elf_patch2_download				0x42DC8 // 0x42e34
 /// advanced download patches found by Devil303
-#define elf_patch3_download				0x4D628 // 0x4D708
+#define elf_patch3_download				0x4D628 // 0x4D708 
 #define elf_patch4_download				0x4E448 // 0x4E528
 #define elf_patch5_download				0x4E468 // 0x4E548
 #define elf_patch6_download				0x4E544 // 0x4E624
@@ -356,7 +356,7 @@
 #define psp_drm_patchD				0x24A8EC
 #define psp_drm_patchE				0x24A8F0
 #define psp_drm_patchF				0x24B2BC
-#define vmode_patch_offset			0x44ADD0
+#define vmode_patch_offset			0x44ADD0	
 
 /* basic_plugins */
 //#define ps1emu_type_check_offset		0x1F78C
@@ -392,8 +392,8 @@
 /* premo_game_plugin */
 #define pcremote_play_offset2			0xc8fc
 
-/* psp_emulator */
-#define psp_set_psp_mode_offset 		0x1C18
+/* psp_emulator */ 
+#define psp_set_psp_mode_offset 		0x1C18 
 
 /* emulator_api */
 #define psp_read						0x102D8
@@ -432,8 +432,8 @@
 #define psp_savedata_patch6				0x46B8
 
 /* nas_plugin */
-#define patch1_nas						0x2EEF4 //
-#define patch2_nas						0x2F058 //
+#define patch1_nas						0x2EEF4 // 
+#define patch2_nas						0x2F058 // 
 #define patch3_nas						0x1FA0C // Install ALL pkgs
 
 /* libfs */
@@ -468,7 +468,6 @@ extern uint8_t condition_psp_change_emu;
 extern uint8_t condition_psp_prometheus;
 extern uint64_t vsh_check;
 extern uint8_t safe_mode;
-extern uint8_t forced_video_mode;
 //extern process_t vsh_process;
 
 /* Functions for kernel */
@@ -490,7 +489,7 @@ int sys_prx_unload_vsh_plugin(unsigned int slot);
 int sys_thread_create_ex(sys_ppu_thread_t *thread, void *entry, uint64_t arg, int prio, uint64_t stacksize, uint64_t flags, const char *threadname);
 
 // PS3Mapi v1.2.1
-int ps3mapi_unload_vsh_plugin(char* name);
+int ps3mapi_unload_vsh_plugin(char* name); 
 void unhook_all_modules(void);
 int ps3mapi_get_vsh_plugin_info(unsigned int slot, char *name, char *filename);
 
