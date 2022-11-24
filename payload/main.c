@@ -584,8 +584,8 @@ void ecdsa_sign(u8 *hash, u8 *R, u8 *S)
 //#define CB_LOCATION "/dev_habib/rebug/cobra/stage2.cex"
 
 #define COBRA_VERSION		0x0F
-#define COBRA_VERSION_BCD	0x0830
-#define HEN_REV				0x0311
+#define COBRA_VERSION_BCD	0x0840
+#define HEN_REV				0x0312
 
 #if defined(FIRMWARE_4_82)
 	#define FIRMWARE_VERSION	0x0482
@@ -1344,6 +1344,9 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				break;
 				case PS3MAPI_OPCODE_PROC_PAGE_ALLOCATE:
 					return ps3mapi_process_page_allocate((process_id_t)param2, param3, param4, param5, param6, (uint64_t *)param7);
+				break;
+				case PS3MAPI_OPCODE_PROC_PAGE_FREE:
+					return ps3mapi_process_page_free((process_id_t)param2, param3, (uint64_t *)param4);
 				break;
 				//----------
 				//MODULE
