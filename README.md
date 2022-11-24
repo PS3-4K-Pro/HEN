@@ -17,6 +17,7 @@ A exploit that allows the console to run unsigned code.<br>
 | HEN icon changes when enabled |
 | IP adress on XMB™ |
 | Gameboot logo & sound enabled |
+| Dynarec support |
 
 <br>
 
