@@ -29,14 +29,18 @@ A exploit that allows the console to run unsigned code.<br>
 
 # v3.1.2
 ### Plugin:
+-Added: Blacklist access to homebrews NP0APOLLO / NP00PKGI3 when CFW syscalls are disabled by @aldostools.<br>
+-Added: Support for .RAP extension (in addition to .rap) by @aldostools.<br>
+-Improved: Simplified Backup/Restore of the act.dat on every boot by @bucanero.<br>
 -Removed: Version notification.<br>
 
 ### Payload:
--Added: HEN enabled icon.<br>
+-Added: Automatically HEN swap icon enabled/disabled.<br>
 -Added: IP address on XMB™.<br>
 -Added: Custom what's new items.<br>
 -Added: Gameboot logo & sound.<br>
 -Added: System update unlock after HEN is enabled.<br>
+-Added: Dynarec Support by @OOsirizX.<br>
 
 # v3.1.1
 ### Resources:
@@ -49,7 +53,7 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: Support for Firmware 4.88.<br>
 
  ### Plugin:
--Added: Backup/Restore of the act.dat on every boot. (Thanks to @bucanero)<br>
+-Added: Backup/Restore of the act.dat on every boot by @bucanero<br>
  
  ### Payload:
 -Added: Dump PSID option to HFW tools.<br>
