@@ -1304,6 +1304,7 @@ int main(void)
 	map_path("/dev_hdd0/hen/webman_features.xml","/dev_flash/vsh/resource/explore/xmb/category_webman_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles webMAN Features Items. (Only When webMAN is Installed)
 	map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches the HEN Logo to Custom What's New.
 	map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches between PlayStation®Store versions.
+	map_path("/dev_flash/vsh/module/software_update_plugin.sprx","/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Unlocks System update via internet.
 	
 	#ifdef DEBUG
 		printMappingList();
