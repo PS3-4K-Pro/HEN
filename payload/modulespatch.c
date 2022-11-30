@@ -919,7 +919,7 @@ LV2_PATCHED_FUNCTION(int, modules_patching, (uint64_t *arg1, uint32_t *arg2))
 				
 				// Check libaudio patch toggle (thanks in1975)
 				// Default is OFF
-				if((i==11) && (cellFsStat("/dev_hdd0/hen/toggles/patch_libaudio.on",&stat)!=0))
+				if((i==11) && (cellFsStat("/dev_flash/hen/xml/audio_patch.on",&stat)!=0))
                 {
                     i++;
                     j++;

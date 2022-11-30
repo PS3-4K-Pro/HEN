@@ -1297,14 +1297,16 @@ int main(void)
 	check_combo_buttons();
 	
 	// File and folder redirections using mappath mappings
-	map_path("/dev_flash/vsh/module/explore_plugin.sprx","/dev_flash/vsh/resource/AAA/explore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Custom What's New and Ads.
-	map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Gameboot Sound.
 	map_path("/dev_flash/vsh/resource/explore/icon/hen_enable.png","/dev_flash/vsh/resource/AAA/hen_enabled.png",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches the HEN Logo.
+	map_path("/dev_flash/vsh/module/explore_plugin.sprx","/dev_flash/vsh/resource/AAA/explore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Custom What's New and Ads.
+	map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches between PlayStation®Store versions.
+	map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Gameboot Sound.
+	map_path("/dev_flash/vsh/module/custom_render_plugin.sprx","/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Music Player visualization mods.
+	map_path("/dev_flash/vsh/module/xmb_plugin.sprx","/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables IP Information on XMB.
+	map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Unlocks System update via internet.
 	map_path("/dev_hdd0/hen/pro_features.xml","/dev_flash/hen/xml/pro_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles Pro File Manager and Pro Features.
 	map_path("/dev_hdd0/hen/webman_features.xml","/dev_flash/vsh/resource/explore/xmb/category_webman_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles webMAN Features Items. (Only When webMAN is Installed)
 	map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches the HEN Logo to Custom What's New.
-	map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches between PlayStation®Store versions.
-	map_path("/dev_flash/vsh/module/software_update_plugin.sprx","/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Unlocks System update via internet.
 	
 	#ifdef DEBUG
 		printMappingList();

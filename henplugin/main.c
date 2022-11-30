@@ -274,10 +274,8 @@ static void reload_xmb(void)
 	}
 	
 // Reload categories and swap icons if remaped 
-	explore_interface->ExecXMBcommand("reload_category game",0,0);
-	explore_interface->ExecXMBcommand("reload_category network",0,0);
-	explore_interface->ExecXMBcommand("reload_category_items photo",0,0);
-
+	explore_interface->ExecXMBcommand("reload_category_items game",0,0);
+	
 // Reload categories for new queries
 	explore_interface->ExecXMBcommand("reload_category game",0,0);
 	explore_interface->ExecXMBcommand("reload_category network",0,0);
@@ -603,7 +601,7 @@ void clear_web_cache_check(void)
 	char path3[0x40];
 	sprintf(path3, "/dev_hdd0/home/%08i/http/cookie.dat", xsetting_CC56EB2D()->GetCurrentUserNumber());
 
-	if(cellFsStat(path1,&stat)==0 && cellFsStat("/dev_hdd0/hen/toggles/clear_web_history.on",&stat)==0)
+	if(cellFsStat(path1,&stat)==0 && cellFsStat("/dev_flash/hen/xml/clear_web_history.on",&stat)==0)
 	{
 		//DPRINTF("Toggle Activated: clear_web_history\n");
 		cellFsUnlink(path1);
@@ -611,7 +609,7 @@ void clear_web_cache_check(void)
 		cleared_total++;
 	}
 	
-	if(cellFsStat(path2,&stat)==0 && cellFsStat("/dev_hdd0/hen/toggles/clear_web_auth_cache.on",&stat)==0)
+	if(cellFsStat(path2,&stat)==0 && cellFsStat("/dev_flash/hen/xml/clear_web_auth_cache.on",&stat)==0)
 	{
 		//DPRINTF("Toggle Activated: clear_web_auth_cache\n");
 		cellFsUnlink(path2);
@@ -619,7 +617,7 @@ void clear_web_cache_check(void)
 		cleared_total++;
 	}
 	
-	if(cellFsStat(path3,&stat)==0 && cellFsStat("/dev_hdd0/hen/toggles/clear_web_cookie.on",&stat)==0)
+	if(cellFsStat(path3,&stat)==0 && cellFsStat("/dev_flash/hen/xml/clear_web_cookie.on",&stat)==0)
 	{
 		//DPRINTF("Toggle Activated: clear_web_cookie\n");
 		cellFsUnlink(path3);
@@ -642,7 +640,7 @@ void set_build_type(void);
 void set_build_type(void)
 {
 	CellFsStat stat;
-	if(cellFsStat("/dev_hdd0/hen/toggles/dev_build_type.on",&stat)==0){build_type=DEV;}
+	if(cellFsStat("/dev_flash/hen/xml/dev_build_type.on",&stat)==0){build_type=DEV;}
 	DPRINTF("Setting build_type to %i\n", build_type);
 }
 
