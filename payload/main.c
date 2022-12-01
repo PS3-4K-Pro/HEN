@@ -1302,6 +1302,7 @@ int main(void)
 	map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches between PlayStation®Store versions.
 	map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Gameboot Sound.
 	map_path("/dev_flash/vsh/module/custom_render_plugin.sprx","/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Music Player visualization mods.
+	map_path("/dev_flash/vsh/module/wboard_plugin.sprx","/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables/Disables What's New and Ads background.
 	map_path("/dev_flash/vsh/module/xmb_plugin.sprx","/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables IP Information on XMB.
 	map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Unlocks System update via internet.
 	map_path("/dev_hdd0/hen/pro_features.xml","/dev_flash/hen/xml/pro_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles Pro File Manager and Pro Features.
