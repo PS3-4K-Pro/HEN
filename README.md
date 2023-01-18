@@ -17,7 +17,7 @@ A exploit that allows the console to run unsigned code.<br>
 | HEN icon changes when enabled |
 | IP adress on XMB™ |
 | Gameboot logo & sound enabled |
-| Dynarec support |
+| PSN™ Blocker |
 
 <br>
 
@@ -26,6 +26,15 @@ A exploit that allows the console to run unsigned code.<br>
 #  Changelogs (by PS3XPloit Team)
  
 <details><summary>Spoiler</summary>
+
+# v3.3.0
+### Plugin:
+-Added: Check for Remaps to avoid Kernel Panic if destination file is missing.<br>
+-Added: Automatic cleaning of logs sent when connecting to PSN in order to reduce the risk of a ban. (CI.TMP, MI.TMP and PTL.TMP)<br>
+
+### Payload:
+-Added: Ability to restore syscalls.<br>
+-Added: PSN™ Blocker (PSN Access is blocked if syscalls are enabled).<br>
 
 # v3.2.0
 ### Plugin:

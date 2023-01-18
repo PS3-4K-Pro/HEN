@@ -25,7 +25,7 @@
 #include "region.h"
 #include "psp.h"
 
-#define MAX_VSH_PLUGINS 			7
+#define MAX_VSH_PLUGINS 			12
 
 #define BOOT_PLUGINS_FILE1			"/dev_usb000/boot_plugins.txt"
 #define BOOT_PLUGINS_FILE2			"/dev_usb001/boot_plugins.txt"
@@ -37,7 +37,7 @@
 
 #define BOOT_PLUGINS_FIRST_SLOT 	1
 #define MAX_BOOT_PLUGINS			(MAX_VSH_PLUGINS-BOOT_PLUGINS_FIRST_SLOT)
-#define MAX_BOOT_PLUGINS_KERNEL			5
+#define MAX_BOOT_PLUGINS_KERNEL		5
 #define PRX_PATH					"/dev_flash/vsh/module/webftp_server.sprx"
 
 LV2_EXPORT int decrypt_func(uint64_t *, uint32_t *);

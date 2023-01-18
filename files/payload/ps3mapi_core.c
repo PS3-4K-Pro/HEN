@@ -190,7 +190,7 @@ int ps3mapi_process_page_allocate(process_id_t pid, uint64_t size, uint64_t page
 
 	int ret;
 	void *kbuf, *vbuf;
-		
+	
 	if (page_size > 0)
 	{
 		ret = page_allocate(process, size, flags, page_size, &kbuf);
@@ -199,7 +199,7 @@ int ps3mapi_process_page_allocate(process_id_t pid, uint64_t size, uint64_t page
 	{
 		ret = page_allocate_auto(process, size, flags, &kbuf);
 	}
-
+	
 	if (ret != SUCCEEDED)
 	{
 		return ENOMEM;
@@ -236,7 +236,7 @@ int ps3mapi_process_page_allocate(process_id_t pid, uint64_t size, uint64_t page
 	temp_table[0] = (uint64_t)vbuf;
 	temp_table[1] = (uint64_t)kbuf;
 	ret = copy_to_user(temp_table, get_secure_user_ptr(page_table), sizeof(uint64_t)*2);
-	
+
 	if (ret != SUCCEEDED)
 	{
 		page_unexport_from_proc(process, vbuf);
@@ -271,7 +271,6 @@ int ps3mapi_process_page_free(process_id_t pid, uint64_t flags, uint64_t *page_t
 
 	return SUCCEEDED;
 }
-
 //-----------------------------------------------
 //MODULES
 //-----------------------------------------------

@@ -32,6 +32,8 @@ typedef struct MapEntry {
 	// unsigned char p_writable;
 // } CellFsMountInformation_t;
 
+uint8_t allow_restore_sc = 1;
+static int8_t avoid_recursive_calls = 0;
 uint8_t photo_gui = 1;
 MapEntry_t *head = NULL;
 MapEntry_t *found = NULL;
@@ -633,23 +635,23 @@ int unlock_mtx(mutex_t* mtx){
 	return ret;
 }
 
-// int unmap_path(char *oldpath)
-// {
-	// int ret = EINVAL;
-	// if (oldpath){
-		// lock_mtx(&map_mtx);
-		// ret = deleteMapping(oldpath);
-		// if(ret==0){
-			// if (strcmp(oldpath, "/dev_bdvd") == 0)
-				// condition_apphome = false;	
-			// #ifdef  DEBUG
-				// DPRINTF("Unmapped path: %s\n", oldpath);
-			// #endif
-		// }
-		// unlock_mtx(&map_mtx);
-	// }
-	// return ret;	
-// }
+/*int unmap_path(char *oldpath)
+ {
+	 int ret = EINVAL;
+	 if (oldpath){
+		 lock_mtx(&map_mtx);
+		 ret = deleteMapping(oldpath);
+		 if(ret==0){
+			 if (strcmp(oldpath, "/dev_bdvd") == 0)
+				 condition_apphome = false;	
+			 #ifdef  DEBUG
+				 DPRINTF("Unmapped path: %s\n", oldpath);
+			 #endif
+		 }
+		 unlock_mtx(&map_mtx);
+	 }
+	 return ret;	
+ }*/
 
 int map_path(char *oldpath, char *newpath, uint32_t flags)
 {
@@ -746,6 +748,7 @@ int get_map_path(uint32_t num, char *path, char *new_path)
 	}
 	return !ret ? 0 : -1;	
 }
+
 LV2_SYSCALL2(int, sys_map_path, (char *oldpath, char *newpath, uint32_t flags))
 {
 	extend_kstack(0);
@@ -1029,8 +1032,50 @@ int read_act_dat_and_make_rif(uint8_t *idps,uint8_t *rap, uint8_t *act_dat, char
 		return 0;
 }
 
+static int check_syscalls()
+{
+	uint8_t syscalls_disabled = ((*(uint64_t *)MKA(syscall_table_symbol + 8 * 6)) == (*(uint64_t *)MKA(syscall_table_symbol)));
+
+	return syscalls_disabled;
+}
+
+void restore_syscalls(const char *path)
+{
+	// Restore disabled CFW Syscalls without reboot just entering to Settings > System Update on XMB - aldostools
+//	if(allow_restore_sc)
+//	{
+		if(!strcmp(path, "/dev_flash/vsh/module/software_update_plugin.sprx")) 
+		{			
+			if(check_syscalls())
+				create_syscalls();
+		}		
+//	}
+}
+
+void check_signin(const char *path)
+{
+	if(!strcmp(path, "/dev_flash/vsh/module/npsignin_plugin.sprx"))
+	{
+		// Lock/Unlock Sign In to PSN if DeViL303's RCO exists    
+		if(check_syscalls())
+			map_path(NPSIGNIN_UNLOCK, NULL, 0);
+		else
+		{	
+			CellFsStat stat;
+			if(cellFsStat(NPSIGNIN_LOCK, &stat) == SUCCEEDED)
+				map_path(NPSIGNIN_UNLOCK, NPSIGNIN_LOCK, 0);
+			else
+				map_path(NPSIGNIN_UNLOCK, NULL, 0);
+		}
+	}
+}
+
 LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 {
+	if(avoid_recursive_calls) 
+		return 0;
+	avoid_recursive_calls = 1;
+	
 	//extend_kstack(0);
 	if(path0){
 		CellFsStat stat;
@@ -1060,7 +1105,7 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 		#endif
 		
 		int syscalls_disabled = ((*(uint64_t *)MKA(syscall_table_symbol + 8 * 6)) == (*(uint64_t *)MKA(syscall_table_symbol)));
-
+		
 		if (syscalls_disabled && path0 && !strncmp(path0, "/dev_hdd0/game/", 15) && strstr(path0 + 15, "/EBOOT.BIN"))
 		{
 		// syscalls are disabled and an EBOOT.BIN is being called from hdd. Let's test it.
@@ -1097,14 +1142,15 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 				allow = 1;
 			if (listed(1, gameid)) // blacklist.cfg test
 				allow = 0;
-		
+			
 			// let's now block homebrews if the "allow" flag is false
 			if (!allow)
-			{
-				set_patched_func_param(1, (uint64_t)crap_pants);
+			{										
+				avoid_recursive_calls = 0;
+				set_patched_func_param(1, (uint64_t)crap_pants);				
 				return 0;
-			}
-		}
+			} 
+		} 	
 
 		if((strstr(path0,".rif")) && (!strncmp(path0,"/dev_hdd0/home/",14)))
 		{
@@ -1254,6 +1300,10 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 				}
 			}
 		}
+		
+		restore_syscalls(path0);		
+		check_signin(path0);
+		
 		if(path && (strncmp(path,"/dev_",5)==0 || strncmp(path,"/app_",5)==0 || strncmp(path,"/host_",6)==0)){			
 			/*if (path && ((strcmp(path, "/dev_bdvd/PS3_UPDATE/PS3UPDAT.PUP") == 0)))  // Blocks FW update from Game discs!     
 			{    
@@ -1315,6 +1365,7 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 			}
 		}
 	}
+	avoid_recursive_calls = 0;
 	return 0;
 }
 
@@ -1374,6 +1425,3 @@ void map_path_patches(int syscall)
 		create_syscall2(SYS_MAP_PATH, sys_map_path);
 	}
 }
-
-
-

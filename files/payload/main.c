@@ -59,7 +59,7 @@
 
 #define COBRA_VERSION		0x0F
 #define COBRA_VERSION_BCD	0x0840
-#define HEN_REV				0x0320
+#define HEN_REV				0x0330
 
 #if defined(FIRMWARE_4_82)
 	#define FIRMWARE_VERSION	0x0482
@@ -79,6 +79,8 @@
 	#define FIRMWARE_VERSION	0x0488
 #elif defined(FIRMWARE_4_89)
 	#define FIRMWARE_VERSION	0x0489
+#elif defined(FIRMWARE_4_90)
+	#define FIRMWARE_VERSION	0x0490							
 #endif
 
 #if defined(CFW)
@@ -367,10 +369,10 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 	{
 		if(rif_fd==fd)
 		{
-			DPRINTF("RIF fd read called:%x %p %016lx %p\n",fd,buf,nbytes,nread);
+			//DPRINTF("RIF fd read called:%x %p %016lx %p\n",fd,buf,nbytes,nread);
 			if(*nread==0x98)
 			{
-				DPRINTF("generating rif ECDSA\n");
+				//DPRINTF("generating rif ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x98, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x98);
@@ -388,10 +390,10 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 		}
 		else if(act_fd==fd)
 		{
-			DPRINTF("act fd read called:%x %p %016lx %p\n\n",fd,buf,nbytes,nread);
+			//DPRINTF("act fd read called:%x %p %016lx %p\n\n",fd,buf,nbytes,nread);
 			if(*nread==0x1038)
 			{
-				DPRINTF("generating act ECDSA\n");
+				//DPRINTF("generating act ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x1038, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x1038);
@@ -411,7 +413,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 		{
 			if(*nread==0x100)
 			{
-				DPRINTF("generating misc ECDSA\n");
+				//DPRINTF("generating misc ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x100, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x100);
@@ -475,7 +477,7 @@ void _sys_cfw_poke(uint64_t *addr, uint64_t value);
 
 LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 {
-	DPRINTF("New poke called\n");
+	//DPRINTF("New poke called\n");
 
 	_sys_cfw_poke(addr, value);
 	asm volatile("icbi 0,%0; isync" :: "r"(addr));
@@ -522,7 +524,7 @@ LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
 
 LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len))
 {
-	DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
+	//DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
 
 	if (len == 8)
 	{
@@ -541,7 +543,7 @@ LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len)
 
 LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 {
-	DPRINTF("LV2 poke %p %016lx\n", ptr, value);
+	//DPRINTF("LV2 poke %p %016lx\n", ptr, value);
 	uint64_t addr=(uint64_t)ptr;
 	if (addr >= MKA(syscall_table_symbol))
 	{
@@ -554,13 +556,13 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 
 			if (((value == sc_null) ||(value == syscall_not_impl)) && (syscall_num != 8)) //Allow removing protected syscall 6 7 9 10 35 NOT 8
 			{
-				DPRINTF("HB remove syscall %ld\n", syscall_num);
+				//DPRINTF("HB remove syscall %ld\n", syscall_num);
 				*ptr=value;
 				return;
 			}
 			else //Prevent syscall 6 7 9 10 and 35 from being re-written
 			{
-				DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
+			//DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
 				return;
 			}
 		}
@@ -604,8 +606,17 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 
 LV2_SYSCALL2(void, sys_cfw_lv1_poke, (uint64_t lv1_addr, uint64_t lv1_value))
 {
-	DPRINTF("LV1 poke %p %016lx\n", (void*)lv1_addr, lv1_value);
+	//DPRINTF("LV1 poke %p %016lx\n", (void*)lv1_addr, lv1_value);
 	lv1_poked(lv1_addr, lv1_value);
+}
+
+LV2_SYSCALL2(uint64_t, sys_cfw_lv1_peek, (uint64_t lv1_addr))
+{
+	DPRINTF("lv1_peek %p\n", (void*)lv1_addr);
+	
+    uint64_t ret;
+    ret = lv1_peekd(lv1_addr);
+    return ret;
 }
 
 LV2_SYSCALL2(void, sys_cfw_lv1_call, (uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5, uint64_t a6, uint64_t a7, uint64_t num))
@@ -669,7 +680,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 {
 	extend_kstack(0);
 
-	DPRINTF("Syscall 8 -> %lx\n", function);
+	//DPRINTF("Syscall 8 -> %lx\n", function);
 
 	// -- AV: temporary disable cobra syscall (allow dumpers peek 0x1000 to 0x9800)
 	static uint8_t tmp_lv1peek = 0;
@@ -743,7 +754,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 		case SYSCALL8_OPCODE_PS3MAPI:
 			switch ((int)param1)
 			{
-				DPRINTF("syscall8: PS3M_API function 0x%x\n", (int)param1);
+				//DPRINTF("syscall8: PS3M_API function 0x%x\n", (int)param1);
 
 				//----------
 				//CORE
@@ -872,6 +883,17 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				case PS3MAPI_OPCODE_PCHECK_SYSCALL8:
 					return ps3mapi_partial_disable_syscall8;
 				break;
+				case PS3MAPI_OPCODE_CREATE_CFW_SYSCALLS:
+					create_syscalls();
+					return SUCCEEDED;
+				break;
+				case PS3MAPI_OPCODE_ALLOW_RESTORE_SYSCALLS:
+					allow_restore_sc = (uint8_t)param2; // 1 = allow, 0 = do not allow
+					return SUCCEEDED;
+				break;
+				case PS3MAPI_OPCODE_GET_RESTORE_SYSCALLS:
+					return allow_restore_sc;
+				break;
 				//----------
 				//REMOVE HOOK
 				//----------
@@ -905,7 +927,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				//DEFAULT
 				//----------
 				default:
-					DPRINTF("syscall8: Unsupported PS3M_API opcode: 0x%lx\n", function);
+					//DPRINTF("syscall8: Unsupported PS3M_API opcode: 0x%lx\n", function);
 					return ENOSYS;
 				break;
 			}
@@ -1121,7 +1143,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 
 	}
 
-	DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
+	//DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
 	return ENOSYS;
 }
 
@@ -1162,6 +1184,20 @@ LV2_SYSCALL2(int, sm_get_fan_policy_sc,(uint8_t id, uint8_t *st, uint8_t *policy
 		}
 	}
 	return ret;
+}
+
+void create_syscalls(void)
+{
+	create_syscall2(8, syscall8);
+	create_syscall2(6, sys_cfw_peek);
+	create_syscall2(7, sys_cfw_poke);
+	//create_syscall2(9, sys_cfw_lv1_poke);
+	create_syscall2(10, sys_cfw_lv1_call);
+	//create_syscall2(11, sys_cfw_lv1_peek);
+	create_syscall2(15, sys_cfw_lv2_func);
+	create_syscall2(389, sm_set_fan_policy_sc);
+	create_syscall2(409, sm_get_fan_policy_sc);
+	create_syscall2(SYS_MAP_PATH, sys_map_path);
 }
 
 static INLINE void apply_kernel_patches(void)
@@ -1234,7 +1270,6 @@ void cleanup_files(void)
 	cellFsUnlink("/dev_rewrite/vsh/resource/explore/xmb/zzz_hen_installed.tmp");
 }
 
-
 // Hotkey Buttons pressed at launch
 //static int mappath_disabled=0;// Disable all mappath mappings at launch
 static int boot_plugins_disabled=0;// Disable user and kernel plugins on launch
@@ -1297,17 +1332,61 @@ int main(void)
 	check_combo_buttons();
 	
 	// File and folder redirections using mappath mappings
-	map_path("/dev_flash/vsh/resource/explore/icon/hen_enable.png","/dev_flash/vsh/resource/AAA/hen_enabled.png",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches the HEN Logo.
-	map_path("/dev_flash/vsh/module/explore_plugin.sprx","/dev_flash/vsh/resource/AAA/explore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Custom What's New and Ads.
-	map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches between PlayStation®Store versions.
-	map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Gameboot Sound.
-	map_path("/dev_flash/vsh/module/custom_render_plugin.sprx","/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables Music Player visualization mods.
-	map_path("/dev_flash/vsh/module/wboard_plugin.sprx","/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables/Disables What's New and Ads background.
-	map_path("/dev_flash/vsh/module/xmb_plugin.sprx","/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Enables IP Information on XMB.
-	map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Unlocks System update via internet.
-	map_path("/dev_hdd0/hen/pro_features.xml","/dev_flash/hen/xml/pro_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles Pro File Manager and Pro Features.
-	map_path("/dev_hdd0/hen/webman_features.xml","/dev_flash/vsh/resource/explore/xmb/category_webman_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Toggles webMAN Features Items. (Only When webMAN is Installed)
-	map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);// Switches the HEN Logo to Custom What's New.
+	
+	// Switches the HEN Logo
+	map_path("/dev_flash/vsh/resource/explore/icon/hen_enable.png","/dev_flash/vsh/resource/AAA/hen_enabled.png",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	
+CellFsStat stat;
+	// Enables Custom What's New, PlayStationnBillboards and DEX Trophy features
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/explore_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/explore_plugin.sprx","/dev_flash/vsh/resource/AAA/explore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Switches between PlayStation®Store versions
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Enables Gameboot Sound
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Enables Music Player visualization mods.
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/custom_render_plugin.sprx","/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Enables/Disables What's New and Ads background
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/wboard_plugin.sprx","/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Enables IP Information on XMB
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/module/xmb_plugin.sprx","/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Unlocks System update via internet.
+	if((cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.rco",&stat)!=1))
+	{
+		map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	}
+	
+	// Toggles Pro File Manager and Pro Features.
+	map_path("/dev_hdd0/hen/pro_features.xml","/dev_flash/hen/xml/pro_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	
+	// Toggles webMAN Features Items. (Only When webMAN is Installed)
+	map_path("/dev_hdd0/hen/webman_features.xml","/dev_flash/vsh/resource/explore/xmb/category_webman_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+	
+	// Switches the HEN Logo to Custom What's New.
+	map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 	
 	#ifdef DEBUG
 		printMappingList();

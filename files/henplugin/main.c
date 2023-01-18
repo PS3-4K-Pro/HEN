@@ -51,7 +51,7 @@
 #pragma comment(lib, "netctl_stub")
 
 #define SERVER_PORT htons(80)
-#define HOST_SERVER "www.ps3xploit.me"
+#define HOST_SERVER "http://raw.githubusercontent.com"
 
 #define RELEASE 0
 #define DEV 1
@@ -405,51 +405,51 @@ static void downloadPKG_thread2(void)
 	if(val==0x323031372F30382FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/482/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/482/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323031392F30312FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/484/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/484/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323031392F30372FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/485/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/485/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323032302F30312FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/486/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/486/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323032302F30372FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/487/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/487/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323032312F30342FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/488/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/488/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 	else if(val==0x323032322F30322FULL)
 		{
 			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/489/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
 			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/489/cex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
+				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
 		}
 		/*
 		// Fix DEX kernel value
@@ -464,8 +464,12 @@ static void downloadPKG_thread2(void)
 	thread2_download_finish=1;
 }
 
-char pkg_path[256]={"/dev_hdd0/Latest_HEN_Installer_signed.pkg"};
+char pkg_path[256]={"/dev_hdd0/Homebrew_Enabler_-_Release.pkg"};
 
+/* I need to ask for this feature 
+char pkg_path_dev[256]={"/dev_hdd0/Homebrew_Enabler_-_Debug.pkg"};
+
+*/
 static void installPKG_thread(void)
 {
 	if(game_ext_interface == 0) // test if game_ext_plugin is loaded for interface access
@@ -525,8 +529,8 @@ int hen_updater(void)
     }
 
 	strcpy(RequestBuffer, "GET ");
-    if(build_type==RELEASE){strcat(RequestBuffer, "/hen/hen_version.bin");}
-    if(build_type==DEV){strcat(RequestBuffer, "/hen/hen_version_dev.bin");}
+    if(build_type==RELEASE){strcat(RequestBuffer, "/PS3-4K-Pro/HEN/master/version/release.bin");}
+    if(build_type==DEV){strcat(RequestBuffer, "/PS3-4K-Pro/HEN/master/version/debug.bin");}
     strcat(RequestBuffer, " HTTP/1.0\r\n");
 	strcat(RequestBuffer, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134\r\n");
     strcat(RequestBuffer, "Accept-Language: en-US\r\n");
@@ -601,6 +605,15 @@ void clear_web_cache_check(void)
 	char path3[0x40];
 	sprintf(path3, "/dev_hdd0/home/%08i/http/cookie.dat", xsetting_CC56EB2D()->GetCurrentUserNumber());
 
+	char path4[0x40];
+	sprintf(path4, "/dev_hdd0/home/%08i/community/CI.TMP", xsetting_CC56EB2D()->GetCurrentUserNumber());
+	
+	char path5[0x40];
+	sprintf(path5, "/dev_hdd0/home/%08i/community/MI.TMP", xsetting_CC56EB2D()->GetCurrentUserNumber());
+	
+	char path6[0x40];
+	sprintf(path6, "/dev_hdd0/home/%08i/community/PTL.TMP", xsetting_CC56EB2D()->GetCurrentUserNumber());
+	
 	if(cellFsStat(path1,&stat)==0 && cellFsStat("/dev_flash/hen/xml/clear_web_history.on",&stat)==0)
 	{
 		//DPRINTF("Toggle Activated: clear_web_history\n");
@@ -633,6 +646,19 @@ void clear_web_cache_check(void)
 	else
 	{
 		//DPRINTF("No Clear Web Cache Toggles Activated\n");
+	}
+	
+	if(cellFsStat(path4,&stat)==0)
+	{
+		cellFsUnlink(path4);
+	}
+	if(cellFsStat(path5,&stat)==0)
+	{		
+		cellFsUnlink(path5);
+	}
+	if(cellFsStat(path6,&stat)==0)
+	{		
+		cellFsUnlink(path6);
 	}
 }
 
