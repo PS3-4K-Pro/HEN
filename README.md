@@ -12,7 +12,7 @@ A exploit that allows the console to run unsigned code.<br>
 
 |HEN™ 4K Pro|
 |----------------------
-| Automatic Cleaning of Logs sent to PSN |
+| Automatic cleaning of logs sent to PSN |
 | Custom what's new items |
 | Custom PlayStation™Store (Video/Game/PSN) shortcut items |
 | HEN icon changes when enabled |
