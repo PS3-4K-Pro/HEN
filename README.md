@@ -14,6 +14,7 @@ A exploit that allows the console to run unsigned code.<br>
 |----------------------
 | Custom what's new items |
 | Custom PlayStation™Store (Video/Game/PSN) shortcut items |
+| Automatic Cleaning of Logs sent to PSN |
 | HEN icon changes when enabled |
 | IP adress on XMB™ |
 | Gameboot logo & sound enabled |
