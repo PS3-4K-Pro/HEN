@@ -62,10 +62,16 @@ static void check_and_correct(CobraConfig *cfg)
 	
 	if (cfg->spoof_revision > MAX_SPOOF_REVISION)
 		cfg->spoof_revision = 0;
+<<<<<<< HEAD
+
+	if(cfg->allow_restore_sc > 1)
+		cfg->allow_restore_sc = 0;
+=======
 	
 	if(cfg->allow_restore_sc > 1)
 		cfg->allow_restore_sc = 0;
 	
+>>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 	if (cfg->size > sizeof(CobraConfig))
 		cfg->size = sizeof(CobraConfig);
 }
@@ -180,4 +186,8 @@ int sys_write_cobra_config(CobraConfig *cfg)
 	//condition_ps2softemu = config.ps2softemu;
 	
 	return write_cobra_config();
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7

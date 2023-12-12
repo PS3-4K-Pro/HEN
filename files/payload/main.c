@@ -61,10 +61,16 @@
 #define COBRA_VERSION_BCD	0x0840
 #define HEN_REV				0x0330
 
-#if defined(FIRMWARE_4_82)
+#if defined(FIRMWARE_4_80)
+	#define FIRMWARE_VERSION	0x0480
+#elif defined(FIRMWARE_4_81)
+	#define FIRMWARE_VERSION	0x0481
+#elif defined(FIRMWARE_4_82)
 	#define FIRMWARE_VERSION	0x0482
 #elif defined(FIRMWARE_4_82DEX)
 	#define FIRMWARE_VERSION	0x0482
+#elif defined(FIRMWARE_4_83)
+	#define FIRMWARE_VERSION	0x0483
 #elif defined(FIRMWARE_4_84)
 	#define FIRMWARE_VERSION	0x0484
 #elif defined(FIRMWARE_4_84DEX)
@@ -80,7 +86,11 @@
 #elif defined(FIRMWARE_4_89)
 	#define FIRMWARE_VERSION	0x0489
 #elif defined(FIRMWARE_4_90)
+<<<<<<< HEAD
+	#define FIRMWARE_VERSION	0x0490
+=======
 	#define FIRMWARE_VERSION	0x0490							
+>>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 #endif
 
 #if defined(CFW)
@@ -188,7 +198,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,bnet_ioctl,(int socket,uint32_t flags, v
 		return DO_POSTCALL;
 }
 
-#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX) || defined (FIRMWARE_4_82)
+#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_6(int,sys_fs_open,(const char *path, int flags, int *fd, uint64_t mode, const void *arg, uint64_t size))
 	{
 	/*	if(!strstr(get_process_name(get_current_process_critical()),"vsh"))
@@ -340,7 +350,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_5(int,um_if_get_token,(uint8_t *token,uint32_t
 		seed[39] |= 0x2; /* QA_FLAG_QA_MODE_ENABLE */
 		seed[47] |= 0x2;
 		seed[47] |= 0x4; /* checked by lv2_kernel.self and sys_init_osd.self */
-				 /* can run sys_init_osd.self from /app_home ? */
+						 /* can run sys_init_osd.self from /app_home ? */
 		seed[51] |= 0x1; /* QA_FLAG_ALLOW_NON_QA */
 		seed[51] |= 0x2; /* QA_FLAG_FORCE_UPDATE */
         /// 2.1.2 QA flag - hmac hash check - START
@@ -364,7 +374,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 	return DO_POSTCALL;
 }
 
-#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX) || defined (FIRMWARE_4_82)
+#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_4(int,sys_fs_read,(int fd, void *buf, uint64_t nbytes, uint64_t *nread))
 	{
 		if(rif_fd==fd)
@@ -385,7 +395,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 				memcpy(buf1+0x70+0x14, S+1, 0x14);
 				memcpy(buf+0x70,buf1+0x70,0x28);
 				page_free(NULL, buf1, 0x2F);
-	//			DPRINTF("R:%015x\nS:%015x\n",R,S);
+				//DPRINTF("R:%015x\nS:%015x\n",R,S);
 			}
 		}
 		else if(act_fd==fd)
@@ -406,7 +416,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 				memcpy(buf1+0x1010+0x14, S+1, 0x14);
 				memcpy(buf+0x1010,buf1+0x1010,0x28);
 				page_free(NULL, buf1, 0x2F);
-	//			DPRINTF("R:%015x\nS:%015x\n",R,S);
+				//DPRINTF("R:%015x\nS:%015x\n",R,S);
 			}
 		}
 		else if(misc_fd==fd)
@@ -1206,6 +1216,7 @@ static INLINE void apply_kernel_patches(void)
 	#if defined (FIRMWARE_4_82DEX) ||  defined (FIRMWARE_4_84DEX)
 		do_patch(MKA(vsh_patch),0x386000014E800020);
 	#endif
+	
 	//do_patch32(MKA(patch_data1_offset), 0x01000000);
 	do_patch32(MKA(module_sdk_version_patch_offset), NOP);
 	do_patch32(MKA(patch_func8_offset1),0x38600000);
@@ -1225,37 +1236,43 @@ static INLINE void apply_kernel_patches(void)
 	*(uint64_t *)MKA(ECDSA_FLAG)=0;
 	
 	/// Adding HEN patches on init for stability ///	 -- END
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX) || defined (FIRMWARE_4_82)
+	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 		hook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
 	#endif
+	
 	hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX) || defined (FIRMWARE_4_82)
+	
+	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 		hook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
 		hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
 	#endif
-	#if defined (FIRMWARE_4_82) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89)
+	
+	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90)
 		hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 		hook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
 	#endif
+	
 	create_syscall2(8, syscall8);
 	create_syscall2(6, sys_cfw_peek);
 	create_syscall2(7, sys_cfw_poke);
-//	create_syscall2(9, sys_cfw_poke_lv1);
+	//create_syscall2(9, sys_cfw_poke_lv1);
 	create_syscall2(10, sys_cfw_lv1_call);
-//	create_syscall2(11, sys_cfw_peek_lv1);
+	//create_syscall2(11, sys_cfw_peek_lv1);
 	create_syscall2(15, sys_cfw_lv2_func);
 	create_syscall2(389, sm_set_fan_policy_sc);
 	create_syscall2(409, sm_get_fan_policy_sc);
 }
 
-/*void enable_ingame_screenshot()
+/*
+void enable_ingame_screenshot()
 {
 	f_desc_t f;
 	f.addr=(void*)0x19531c;
 	f.toc=(void*)0x6F5558;
 	int(*set_SSHT)(int)=(void*)&f;
 	set_SSHT(1);
-}*/
+}
+*/
 
 // Cleanup Old and Temp HEN Files
 void cleanup_files(void)
@@ -1264,15 +1281,11 @@ void cleanup_files(void)
 	cellFsUnlink("/dev_hdd0/hen/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/ps3hen_updater.xml");
-	
-	// This file is installed by default pkg and is used to determine when HEN has finished installing, in henplugin.
-	// Remove it on launch to eliminate false checks.
-	cellFsUnlink("/dev_rewrite/vsh/resource/explore/xmb/zzz_hen_installed.tmp");
 }
 
 // Hotkey Buttons pressed at launch
 //static int mappath_disabled=0;// Disable all mappath mappings at launch
-static int boot_plugins_disabled=0;// Disable user and kernel plugins on launch
+static int boot_plugins_disabled=0;// external_boot_plugins.txt and external_boot_plugins_kernel.txt support
 
 static void check_combo_buttons(void);
 static void check_combo_buttons(void)
@@ -1282,7 +1295,7 @@ static void check_combo_buttons(void)
 	timer_usleep(40000);
 	
 	if (pad_get_data(&onboot) >= ((PAD_BTN_OFFSET_DIGITAL+1)*2)){
-/*
+
 		if((onboot.button[PAD_BTN_OFFSET_DIGITAL] & (PAD_CTRL_L2)) == (PAD_CTRL_L2)){
 
 			mappath_disabled=1;
@@ -1290,16 +1303,45 @@ static void check_combo_buttons(void)
 				DPRINTF("PAYLOAD->L2 Pressed: mappath remappings disabled\n");
 			#endif
 		}
-*/
+
 		if((onboot.button[PAD_BTN_OFFSET_DIGITAL] & (PAD_CTRL_R2)) == (PAD_CTRL_R2)){
 
 			boot_plugins_disabled=1;
 			#ifdef DEBUG
-				//DPRINTF("PAYLOAD->R2 Pressed: boot plugins disabled\n");
+				DPRINTF("PAYLOAD->R2 Pressed: boot plugins disabled\n");
 			#endif
 		}
 	}
 	timer_usleep(20000);
+}
+
+// Check if HEN is being installed and if true, remove boot_plugins.txt
+void is_hen_being_installed(void)
+{
+	int fd;
+	uint32_t* read_bytes = (uint32_t*)0x89FFFF00;
+	
+	if(((unsigned int)*read_bytes)==(0x48454E00))
+	{
+		#ifdef DEBUG
+			DPRINTF("PAYLOAD->HEN is being installed\n");
+			//DPRINTF("PAYLOAD->read_bytes value: %08X\n", (unsigned int)*read_bytes);
+		#endif
+		
+		// Delete Boot Plugins Text Files
+		cellFsUnlink("/dev_hdd0/boot_plugins.txt");
+		cellFsUnlink("/dev_hdd0/boot_plugins_kernel.txt");
+		
+		// Create temp file for henplugin to read, to show message
+		cellFsOpen("/dev_hdd0/tmp/installer.active", CELL_FS_O_CREAT | CELL_FS_O_RDWR, &fd, 0777, NULL, 0);
+		cellFsClose(fd);
+	}
+	else
+	{
+		#ifdef DEBUG
+			DPRINTF("PAYLOAD->HEN is NOT being installed\n");
+		#endif
+	}
 }
 
 
@@ -1315,8 +1357,8 @@ int main(void)
 		DPRINTF("PS3HEN loaded (load base = %p, end = %p) (version = %08X)\n", &_start, &__self_end, MAKE_VERSION(COBRA_VERSION, FIRMWARE_VERSION, IS_CFW));
 	#endif
 
-	//	poke_count=0;
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX) || defined (FIRMWARE_4_82)
+	//poke_count=0;
+	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 		ecdsa_set_curve();
 		ecdsa_set_pub();
 		ecdsa_set_priv();
@@ -1329,9 +1371,110 @@ int main(void)
 	cleanup_files();
 	
 	// Check for hotkey button presses on launch
-	check_combo_buttons();
+	check_combo_buttons();	
+	
+	// Check for hotkey button presses on launch (updated for 3.2.2 thanks FFF256)
+	CellFsStat stat;
+	if(cellFsStat("/dev_flash/hen/xml/hotkey_polling.off",&stat)!=0)
+	{
+		check_combo_buttons();// Pad function fixed 20230422 (thanks aldostools)
+		#ifdef DEBUG
+			//DPRINTF("PAYLOAD->hotkey_polling.off->L2 and R2 hotkeys are disabled\n");
+		#endif
+	}
+	
+	// Check for disabled remap
+	if(cellFsStat("/dev_flash/hen/xml/remap_files.off",&stat)==0)
+	{
+		mappath_disabled=1;
+		cellFsUnlink("/dev_flash/hen/xml/remap_files.off");
+		#ifdef DEBUG
+			//DPRINTF("PAYLOAD->remap_files.off->Internal mappings disabled until reboot\n");
+		#endif
+	}
 	
 	// File and folder redirections using mappath mappings
+<<<<<<< HEAD
+	if(mappath_disabled==0)
+	{	
+
+		// Switches the HEN logo.
+		if((cellFsStat("/dev_flash/vsh/resource/AAA/hen_enabled.png",&stat)==0))
+		{
+			map_path("/dev_flash/vsh/resource/explore/icon/hen_enable.png","/dev_flash/vsh/resource/AAA/hen_enabled.png",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+		}
+			
+		// Checks if PS3™ 4K Pro Mod is installed, if so, do the remaps.
+		if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0))
+		{
+			// Checks if webMAN features is enabled and mapped via webMAN script, if so disables xai plugin similar features and uses webMAN ones. (Full version)
+			if((cellFsStat("/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/remaps/Features_Switch_Webman_Plugin.xml",&stat)!=0))
+			{
+				map_path("/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/remaps/Features_Switch_Xai_Plugin.xml","/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/xmls/Features_Switch_Xai_Plugin.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+		
+			// Checks if webMAN features is enabled and mapped via webMAN script, if so disables xai plugin similar features and uses webMAN ones. (Lite version)
+			if((cellFsStat("/dev_hdd0/game/PS34KPROL/USRDIR/toolbox/remaps/Features_Switch_Webman_Plugin.xml",&stat)!=0))
+			{
+				map_path("/dev_hdd0/game/PS34KPROL/USRDIR/toolbox/remaps/Features_Switch_Xai_Plugin.xml","/dev_hdd0/game/PS34KPROL/USRDIR/toolbox/xmls/Features_Switch_Xai_Plugin.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables custom What's New, PlayStation® Billboards and DEX Trophy features on CEX. (Extra: Install PKG on non QA Flagged systems, Multi language for hard codded debug items, Anti-brick patches and Support for case insensitivity in File Explorer for previewing files)
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/explore_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/explore_plugin.sprx","/dev_flash/vsh/resource/AAA/explore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables Debug XMB™.
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/xmb_plugin.sprx","/dev_flash/vsh/resource/AAA/xmb_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables Gameboot sound. (Extra: Region Block, PS3 HDD whitelisted games crash, LIC.EDAT license check bypassed)
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables Music player visualization mods. (Note: May cause black screen on exit while in memory hungry games)
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/custom_render_plugin.sprx","/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables PlayStation®Store versions toggle. (Extra: Legacy store with up to date content)
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/newstore_plugin.sprx","/dev_flash/vsh/resource/AAA/newstore_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables File Manager and PS3™ 4K Pro features.
+			if((cellFsStat("/dev_flash/hen/xml/pro_features.xml",&stat)==0))
+			{
+				map_path("/dev_hdd0/hen/pro_features.xml","/dev_flash/hen/xml/pro_features.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Enables What's New and Ads background toggle.
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",&stat)==0))
+			{
+				map_path("/dev_flash/vsh/module/wboard_plugin.sprx","/dev_flash/vsh/resource/AAA/wboard_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Switches the HEN enabler to custom What's New.
+			if((cellFsStat("/dev_flash/hen/xml/hen_enabled.xml",&stat)==0))
+			{
+				map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+			
+			// Unlocks the "System Update via Internet" option only when WebMAN ps3-updatelist.txt is redirected.
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.rco",&stat)==0) && (cellFsStat("/dev_hdd0/ps3-updatelist.txt",&stat)==0) && (cellFsStat("/dev_hdd0/boot_plugins.txt",&stat)==0) && ((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0)))
+			{
+				map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+			}
+		}
+	}
+=======
 	
 	// Switches the HEN Logo
 	map_path("/dev_flash/vsh/resource/explore/icon/hen_enable.png","/dev_flash/vsh/resource/AAA/hen_enabled.png",FLAG_MAX_PRIORITY|FLAG_PROTECT);
@@ -1387,6 +1530,7 @@ CellFsStat stat;
 	
 	// Switches the HEN Logo to Custom What's New.
 	map_path("/dev_hdd0/hen/hen_enable.xml","/dev_flash/hen/xml/hen_enabled.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+>>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 	
 	#ifdef DEBUG
 		printMappingList();
@@ -1413,8 +1557,12 @@ CellFsStat stat;
 	memset((void *)MKA(0x7e0000),0,0x100);
 	memset((void *)MKA(0x7f0000),0,0x1000);
 	
+	// Check if HEN is being installed and if true, remove boot_plugins.txt
+	is_hen_being_installed();
+	
 	if(boot_plugins_disabled==0)
-	{
+	{	
+
 		load_boot_plugins();
 		load_boot_plugins_kernel();
 	
@@ -1422,14 +1570,16 @@ CellFsStat stat;
 			//DPRINTF("PAYLOAD->plugins loaded\n");
 		#endif
 	}
-/*
+	
 	else
-	{
+	{	
+		//cellFsRename(MYGAMES_FILE, MYGAMES_FILE2 ".xml");
+
+		load_hen_plugin(); //Enables hen plugin remaps even if boot_plugins are disabled
+		
 		#ifdef DEBUG
 			//DPRINTF("PAYLOAD->plugins not loaded\n");
 		#endif
-	}
-*/
 	
 	//enable_ingame_screenshot();
 	

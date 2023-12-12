@@ -190,7 +190,11 @@ int ps3mapi_process_page_allocate(process_id_t pid, uint64_t size, uint64_t page
 
 	int ret;
 	void *kbuf, *vbuf;
+<<<<<<< HEAD
+
+=======
 	
+>>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 	if (page_size > 0)
 	{
 		ret = page_allocate(process, size, flags, page_size, &kbuf);
