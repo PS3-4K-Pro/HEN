@@ -3,7 +3,6 @@
 #include <lv2/hid.h>
 #include <lv2/pad.h>
 
-<<<<<<< HEAD
 // 20230422 Fixed hanging up issue with more than one device connected (thanks aldostools)
 int pad_get_data(pad_data *data)
 {
@@ -34,33 +33,6 @@ int pad_get_data(pad_data *data)
 		} while (ret == 0);
 	}
 
-=======
-int pad_get_data(pad_data *data)
-{
-	int ret;
-	
-	memset(data, 0, sizeof(pad_data));
-	
-	while ((ret = hid_mgr_read_usb(0, data, 0x40, 0)) == 0);	
-	
-	if (ret == 0xFFFFFFD8)
-	{
-		// USB failed, try BT now...
-		
-		uint16_t len;
-		
-		do
-		{		
-			len = 0x40;
-			ret = hid_mgr_read_bt(0, data, &len, 1);
-			
-			if (ret == 0)			
-				ret = len;			
-			
-		} while (ret == 0);
-	}
-	
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 	return ret;
 }
 

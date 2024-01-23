@@ -25,11 +25,7 @@
 #include "region.h"
 #include "psp.h"
 
-<<<<<<< HEAD
 #define MAX_VSH_PLUGINS 			15
-=======
-#define MAX_VSH_PLUGINS 			12
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 
 #define BOOT_PLUGINS_FILE1			"/dev_usb000/external_boot_plugins.txt"
 #define BOOT_PLUGINS_FILE2			"/dev_usb001/external_boot_plugins.txt"
@@ -1395,6 +1391,25 @@ void load_boot_plugins(void)
 	}
 
 	// EVILNAT END
+}
+
+void load_hen_plugin(void)
+{
+
+	if (!vsh_process)
+	{
+		get_vsh_proc();
+	}
+
+	CellFsStat stat;
+	if(cellFsStat("/dev_hdd0/HENplugin.sprx",&stat)==0)
+	{
+		sys_prx_id_t prx = prx_load_module(vsh_process, 0, 0, "/dev_hdd0/HENplugin.sprx");
+		if(prx)
+		{
+			prx_start_module_with_thread(prx, vsh_process, 0, 0);
+		}
+	}
 }
 
 #ifdef DEBUG

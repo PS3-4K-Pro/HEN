@@ -590,7 +590,6 @@ static int unlock_mtx(mutex_t* mtx) {
 	return ret;
 }
 
-<<<<<<< HEAD
 //int destroy_mtx(mutex_t* mtx) {
 //	int ret=mtx ? 0 : EINVAL;
 //	if(mtx && *mtx) {
@@ -660,25 +659,6 @@ static int unlock_mtx(mutex_t* mtx) {
 	// }
 	// return ret;
 // }
-=======
-/*int unmap_path(char *oldpath)
- {
-	 int ret = EINVAL;
-	 if (oldpath){
-		 lock_mtx(&map_mtx);
-		 ret = deleteMapping(oldpath);
-		 if(ret==0){
-			 if (strcmp(oldpath, "/dev_bdvd") == 0)
-				 condition_apphome = false;	
-			 #ifdef  DEBUG
-				 DPRINTF("Unmapped path: %s\n", oldpath);
-			 #endif
-		 }
-		 unlock_mtx(&map_mtx);
-	 }
-	 return ret;	
- }*/
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 
 int map_path(char *oldpath, char *newpath, uint32_t flags)
 {
@@ -1059,7 +1039,7 @@ static int read_act_dat_and_make_rif(uint8_t *idps,uint8_t *rap, uint8_t *act_da
 		return 0;
 }
 
-<<<<<<< HEAD
+
 extern char umd_file;
 static uint8_t block_psp_launcher = 0;
 static int check_syscalls()
@@ -1101,49 +1081,7 @@ void check_signin(const char *path)
 }
 
 LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
-{	
-=======
-static int check_syscalls()
 {
-	uint8_t syscalls_disabled = ((*(uint64_t *)MKA(syscall_table_symbol + 8 * 6)) == (*(uint64_t *)MKA(syscall_table_symbol)));
-
-	return syscalls_disabled;
-}
-
-void restore_syscalls(const char *path)
-{
-	// Restore disabled CFW Syscalls without reboot just entering to Settings > System Update on XMB - aldostools
-//	if(allow_restore_sc)
-//	{
-		if(!strcmp(path, "/dev_flash/vsh/module/software_update_plugin.sprx")) 
-		{			
-			if(check_syscalls())
-				create_syscalls();
-		}		
-//	}
-}
-
-void check_signin(const char *path)
-{
-	if(!strcmp(path, "/dev_flash/vsh/module/npsignin_plugin.sprx"))
-	{
-		// Lock/Unlock Sign In to PSN if DeViL303's RCO exists    
-		if(check_syscalls())
-			map_path(NPSIGNIN_UNLOCK, NULL, 0);
-		else
-		{	
-			CellFsStat stat;
-			if(cellFsStat(NPSIGNIN_LOCK, &stat) == SUCCEEDED)
-				map_path(NPSIGNIN_UNLOCK, NPSIGNIN_LOCK, 0);
-			else
-				map_path(NPSIGNIN_UNLOCK, NULL, 0);
-		}
-	}
-}
-
-LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
-{
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 	if(avoid_recursive_calls) 
 		return 0;
 	avoid_recursive_calls = 1;
@@ -1175,7 +1113,6 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 				}
 			}
 		#endif
-<<<<<<< HEAD
 
 		if (block_psp_launcher && !umd_file && !strncmp(path0, "/dev_flash/pspemu", 17))
 		{
@@ -1183,56 +1120,6 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 			set_patched_func_param(1, (uint64_t)no_exists);
 			return 0;
 		}
-=======
-		
-		int syscalls_disabled = ((*(uint64_t *)MKA(syscall_table_symbol + 8 * 6)) == (*(uint64_t *)MKA(syscall_table_symbol)));
-		
-		if (syscalls_disabled && path0 && !strncmp(path0, "/dev_hdd0/game/", 15) && strstr(path0 + 15, "/EBOOT.BIN"))
-		{
-		// syscalls are disabled and an EBOOT.BIN is being called from hdd. Let's test it.
-		char *gameid = path0 + 15;
-
-		// flag "whitelist" id's
-		int allow =
-		!strncmp(gameid, "NP", 2) ||
-		!strncmp(gameid, "BL", 2) ||
-		!strncmp(gameid, "BC", 2) ||
-		!strncmp(gameid, "KOEI3", 5) ||
-		!strncmp(gameid, "KTGS3", 5) ||
-		!strncmp(gameid, "MRTC0", 5) ||
-		!strncmp(gameid, "ASIA0", 5) ||
-		!strncmp(gameid, "_DEL_", 5) || // Fix data corruption if you uninstall game/game update/homebrew with syscall disabled # Alexander's
-		!strncmp(gameid, "_INST_", 6) || // 80010006 error fix when trying to install a game update with syscall disabled. # Joonie's, Alexander's, Aldo's
-		!strncmp(gameid, "GUST0", 5) ;
-		;
-
-		// flag some "blacklist" id's
-		if (
-			!strncmp(gameid, "BLES806", 7) || // Multiman and assorted tools are in the format BLES806**
-			!strncmp(gameid, "BLJS10018", 9) || // PSNPatch Stealth (older versions were already detected as non-NP/BC/BL)
-			!strncmp(gameid, "BLES08890", 9) || // PSNope by user
-			!strncmp(gameid, "BLES13408", 9) || // FCEU NES Emulator
-			!strncmp(gameid, "BLES01337", 9) || // Awesome File Manager
-			!strncmp(gameid, "BLND00001", 9) || // dev_blind
-			!strncmp(gameid, "NPEA90124", 9) || // SEN Enabler
-			!strncmp(gameid, "NP0", 3)          // NP0APOLLO / NP00PKGI3
-			) allow = 0;
-
-			// test whitelist.cfg and blacklist.cfg
-			if (listed(0, gameid)) // whitelist.cfg test
-				allow = 1;
-			if (listed(1, gameid)) // blacklist.cfg test
-				allow = 0;
-			
-			// let's now block homebrews if the "allow" flag is false
-			if (!allow)
-			{										
-				avoid_recursive_calls = 0;
-				set_patched_func_param(1, (uint64_t)crap_pants);				
-				return 0;
-			} 
-		} 	
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 
 		if (!strncmp(path0, "/dev_hdd0/game/", 15))
 		{
@@ -1440,20 +1327,10 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 				}
 			}
 		}
-<<<<<<< HEAD
 
 		if(path && (strncmp(path,"/dev_",5) == 0 || strncmp(path,"/app_",5) == 0 || strncmp(path,"/host_",6) == 0)) {
 			/*if (path && ((strcmp(path, "/dev_bdvd/PS3_UPDATE/PS3UPDAT.PUP") == 0)))  // Blocks FW update from Game discs!
 			{
-=======
-		
-		restore_syscalls(path0);		
-		check_signin(path0);
-		
-		if(path && (strncmp(path,"/dev_",5)==0 || strncmp(path,"/app_",5)==0 || strncmp(path,"/host_",6)==0)){			
-			/*if (path && ((strcmp(path, "/dev_bdvd/PS3_UPDATE/PS3UPDAT.PUP") == 0)))  // Blocks FW update from Game discs!     
-			{    
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 				char not_update[40];
 				sprintf(not_update, "/dev_bdvd/PS3_NOT_UPDATE/PS3UPDAT.PUP");
 				set_patched_func_param(1, (uint64_t)not_update);

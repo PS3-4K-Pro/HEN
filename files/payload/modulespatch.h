@@ -935,6 +935,7 @@ void do_hook_all_syscalls(void);
 void modules_patch_init(void);
 void load_boot_plugins(void);
 void load_hen_plugin(void);
+
 int prx_load_vsh_plugin(unsigned int slot, char *path, void *arg, uint32_t arg_size);
 int prx_unload_vsh_plugin(unsigned int slot);
 

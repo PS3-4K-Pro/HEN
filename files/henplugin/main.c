@@ -52,11 +52,8 @@
 #pragma comment(lib, "netctl_stub")
 
 #define SERVER_PORT htons(80)
-<<<<<<< HEAD
 #define HOST_SERVER "www.ps3-4k-pro.epizy.com"
-=======
-#define HOST_SERVER "http://raw.githubusercontent.com"
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
+
 
 #define RELEASE 0
 #define DEV 1
@@ -461,7 +458,6 @@ static void downloadPKG_thread2(void)
 	{
 		download_interface = (download_plugin_interface *)plugin_GetInterface(View_Find("download_plugin"), 1);
 	}
-<<<<<<< HEAD
 	show_msg((char *)"Downloading Latest HEN Package");
 	
 	uint64_t val=peekq(0x80000000002FCB68ULL);// CEX
@@ -601,73 +597,6 @@ static void downloadPKG_thread2(void)
 	thread2_download_finish=1;
 }
 
-=======
-	show_msg((char *)"Downloading latest HEN pkg");
-	uint64_t val=peekq(0x80000000002FCB68ULL);
-	if(val==0x323031372F30382FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323031392F30312FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323031392F30372FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323032302F30312FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323032302F30372FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323032312F30342FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-	else if(val==0x323032322F30322FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Release.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://github.com/PS3-4K-Pro/HEN/releases/download/HEN/Homebrew_Enabler_-_Debug", (wchar_t *) L"/dev_hdd0");}
-		}
-		/*
-		// Fix DEX kernel value
-	else if(val==0x323031392F30312FULL)
-		{
-			if(build_type==RELEASE){
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/release/484/dex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
-			else{
-				download_interface->DownloadURL(0, (wchar_t *) L"http://www.ps3xploit.me/hen/dev/484/dex/installer/Latest_HEN_Installer_signed.pkg", (wchar_t *) L"/dev_hdd0");}
-		}
-		*/
-	thread2_download_finish=1;
-}
-
-char pkg_path[256]={"/dev_hdd0/Homebrew_Enabler_-_Release.pkg"};
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
 
 /* I need to ask for this feature 
 char pkg_path_dev[256]={"/dev_hdd0/Homebrew_Enabler_-_Debug.pkg"};
@@ -733,13 +662,9 @@ int hen_updater(void)
     }
 
 	strcpy(RequestBuffer, "GET ");
-<<<<<<< HEAD
+
     if(build_type==RELEASE){strcat(RequestBuffer, "/version/release.bin");}
     if(build_type==DEV){strcat(RequestBuffer, "/version/debug.bin");}
-=======
-    if(build_type==RELEASE){strcat(RequestBuffer, "/PS3-4K-Pro/HEN/master/version/release.bin");}
-    if(build_type==DEV){strcat(RequestBuffer, "/PS3-4K-Pro/HEN/master/version/debug.bin");}
->>>>>>> 2ad10a9b325918fa825f8ea652cd55154dc5baa7
     strcat(RequestBuffer, " HTTP/1.0\r\n");
 	strcat(RequestBuffer, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134\r\n");
     strcat(RequestBuffer, "Accept-Language: en-US\r\n");
