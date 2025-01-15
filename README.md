@@ -10,14 +10,17 @@ A exploit that allows the console to run unsigned code.<br>
 
 # Exclusive Features:
 
-|HEN™ 4K Pro|
-|----------------------
-| Automatic cleaning of logs sent to PSN |
-| Custom what's new items |
-| Custom PlayStation™Store (Video/Game/PSN) shortcut items |
-| HEN icon changes when enabled |
-| IP adress on XMB™ |
-| Gameboot logo & sound enabled |
+| HEN™ 4K Pro |
+|----------------------------|
+| Automatic XMB™ Reload |
+| Custom "What's New" Items |
+| Custom PlayStation™ Store (Video/Game/PSN) Shortcut Items |
+| HEN Icon Changes When Enabled |
+| IP Address Displayed on XMB™ |
+| Gameboot Logo & Sound Enabled |
+| Hidden Trophy Toggle |
+| PlayStation™ Store Version Toggle |
+| PlayStation® Widescreen Patch |
 | PSN™ Blocker |
 
 <br>
@@ -28,24 +31,72 @@ A exploit that allows the console to run unsigned code.<br>
  
 <details><summary>Spoiler</summary>
 
-# v3.3.0
-### Plugin:
--Added: Check for Remaps to avoid Kernel Panic if destination file is missing.<br>
--Added: Automatic cleaning of logs sent when connecting to PSN in order to reduce the risk of a ban. (CI.TMP, MI.TMP and PTL.TMP)<br>
+# v3.3.3 (Exclusive)
+### Payload:
+-Added: Automatic XMB™ reload if more than one user exists.<br>
+-Added: Toggle for hidden trophy information.<br>
+-Added: PlayStation® widescreen patch.<br>
+
+# v3.3.2 (Exclusive)
+### Payload:
+-Added: Check for Remaps to avoid kernel panic if destination file is missing.<br>
+-Added: Toggle for PlayStation™Store version. (Modern/Legacy)<br>
 
 ### Payload:
 -Added: Ability to restore syscalls.<br>
--Added: PSN™ Blocker (PSN Access is blocked if syscalls are enabled).<br>
+-Added: PSN™ Blocker (PSN™ Access is blocked if syscalls are enabled).<br>
+
+# v3.3.1
+### Plugin:
+-Added: DLOG function for output to usb000. (Developers Only)<br>
+-Added: HEN restore functionality for new package that supports HEN surviving an HDD reformat.<br>
+-Added: Cleaning PSN™ files.<br>
+-Added: Create_default_dirs function for creating standard folders if missing on dev_hdd0.<br>
+-Improved: Cleaned up clear_web_cache_check function.<br>
+-Improved: Updated emergency installer to check USB ports 000 - 007 (HEN_UPD.pkg from USB)<br>
+-Improved: Updated functions for LED presets.<br>
+-Improved: Updated set_build_type function to check USB ports 000 - 007 (For Developer Mode)<br>
+
+### Payload:
+-Added: Support for rap.bin. It looks for /dev_hdd0/game/PS3XPLOIT/USRDIR/rap.bin when the make_rif function runs.<br>
+-Added: cellFsRename_symbol.<br>
+-Improved: Changes made to make_rif functionality for better performance.<br>
+-Improved: Now renaming boot plugin files temporarily, instead of deleting them if WMM is found during installation.<br>
+-Improved: Updated cellFsMkdir_symbol offsets.<br>
+-Added: Implemented optimized read rap.bin functionality.<br>
+
+### Resources:
+-Added: New custom coldboot RAF files for release, debug, usb, and DEX.<br>
+-Added: PlayStation®Home link installer/launcher under PSN™ category.<br>
+-Fixed: seg_mcutility entry in category_game.xml. (Fixes issue with PS1™/PS2™ virtual memory card menu item)<br>
+-Improved: Using PS3XPLOIT game directory to add HEN install status to gamedata db, for surviving HDD format. (Hidden from XMB™)<br>
+
+# v3.3.0
+### Global:
+-Added: Support for 4.91 CEX firmware.<br>
+
+### Plugin:
+-Fixed: Early reboot problem with HEN_UPD.PKG for emergency USB recovery.<br>
+
+### Payload:
+-Fixed: Issue with PSP™ Launcher.<br>
+
+### Resources:
+-Added: Support for PlayStation®Home Catalogue path in download_list.xml.<br>
+-Added: Support for dev_usb002 - dev_usb007 in package manager.<br>
+-Added: Toggle 99% package install/delete option in HFW Tools > Maintenance.<br>
+-Improved: Updated download_list.xml to use updated paths on dev_hdd0.<br>
 
 # v3.2.0
 ### Plugin:
+-Added: Automatic cleaning of logs sent when connecting to PSN™ in order to reduce the risk of a ban. (CI.TMP, MI.TMP and PTL.TMP)<br>
 -Added: Automatic reboot after successful initial HEN installation from Network and USB.<br>
 -Added: Blacklist access to homebrews NP0APOLLO / NP00PKGI3 when CFW syscalls are disabled by @aldostools.<br>
--Added: Dynarec Support by @OsirizX.<br>
+-Added: Dynarec Support.<br>
 -Added: Libcrypt Support for PS1 games (LSF/SBI files) by @aldostools.<br>
 -Added: PSX Bios patched with product code 0x85 for PAL games.<br>
 -Added: Support for .RAP extension (in addition to .rap) by @aldostools.<br>
--Added: Toggle for Audio Patch by @in1975.<br>
+-Added: Toggle for Audio Patch.<br>
 -Added: Toggle for Build types. (DEV/Release)<br>
 -Added: Toggle to clean Web Browser user information upon HEN activation. (Auth, Cache,Cookies, History)<br>
 -Improved: Simplified Backup/Restore of the act.dat on every boot by @bucanero.<br>
@@ -62,9 +113,9 @@ A exploit that allows the console to run unsigned code.<br>
 
 ### Payload:
 -Added: Automatically HEN swap icon enabled/disabled.<br>
--Added: IP address on XMB™.<br>
 -Added: Custom what's new items.<br>
 -Added: Gameboot logo & sound.<br>
+-Added: IP address on XMB™.<br>
 -Added: System update unlock after HEN is enabled.<br>
 
 # v3.1.1

@@ -1,0 +1,338 @@
+﻿<!-- Coded for PS3™ 4K Pro by Luan Teles -->
+
+<XMBML version="1.0">
+	<!-- XMB™ Menu > Game Category (Folders) -->
+	<View id="root">
+		<Attributes>
+			<!-- HEN Exploit™ -->
+ 			<Table key="seg_hen_exploit">
+ 				<Pair key="focus_priority"><String>-1</String></Pair>
+ 				<Pair key="custom_priority"><String>psn=-80</String></Pair>
+ 			</Table>
+ 			<!-- Media Discs -->
+ 			<Table key="seg_device">
+ 				<Pair key="focus_detect"><String>enable</String></Pair>
+ 			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/folder-pixmap" key="seg_hen_exploit" attr="seg_hen_exploit" src="xcb://localhost/exists?having=on&rquery=root.fixed_items.hen_exploit&cond=Ae+Game:Common.dirPath /dev_hdd0/game+Ae+Game:Common.fileName PS34KPROX"/>
+			<Query class="type:x-xmb/folder-pixmap" key="seg_hen_exploit_restore" attr="seg_hen_exploit" src="xcb://localhost/exists?having=off&rquery=root.fixed_items.hen_exploit_restoration&cond=Ae+Game:Common.dirPath /dev_hdd0/game+Ae+Game:Common.fileName PS34KPROX"/>
+			<Query class="type:x-xmb/folder-pixmap" key="seg_pro_toolbox" src="xcb://localhost/exists?having=on&rquery=root.fixed_items.pro_toolbox_hen&cond=Ae+Game:Common.dirPath /dev_hdd0/game+Ae+Game:Common.fileName PS34KPROX"/>
+			<Query class="type:x-xmb/folder-pixmap" key="seg_pro_toolbox_restore" src="xcb://localhost/exists?having=off&rquery=root.fixed_items.system_restoration_hen&cond=Ae+Game:Common.dirPath /dev_hdd0/game+Ae+Game:Common.fileName PS34KPROX"/>
+		</Items>
+	</View>
+
+	<!-- XMB™ Menu > Game Category > Data Management (Upper Items) -->
+	<View id="seg_data_management_upper_items">
+		<Attributes>
+			<!-- PS™Vita System Application Utility -->
+			<Table key="psp2appdata">
+				<Pair key="icon_rsc"><String>tex_album_icon</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemAlbum</String></Pair>
+				<Pair key="title_rsc"><String>msg_vita_application_utility</String></Pair>
+				<Pair key="str_noitem"><String>msg_error_no_content</String></Pair>
+				<Pair key="action"><String>exec_psp2appdata</String></Pair>
+			</Table>
+			<!-- Game Data Utility -->
+			<Table key="gamedata">
+				<Pair key="icon_rsc"><String>tex_album_icon</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemAlbum</String></Pair>
+				<Pair key="title_rsc"><String>msg_gamedata_utility</String></Pair>
+				<Pair key="str_noitem"><String>msg_error_no_gamedata</String></Pair>
+				<Pair key="child"><String>segment</String></Pair>
+				<Pair key="action"><String>exec_game</String></Pair>
+			</Table>
+			</Attributes>
+		<Items>
+			<Query class="type:x-xmb/xmlpsp2appdata" key="psp2appdata" attr="psp2appdata" src="#seg_psp2appdata_vita"/>
+			<Query class="type:x-xmb/folder-pixmap" key="gamedata" attr="gamedata" src="#seg_gamedata_items"/>
+ 		</Items>
+	</View>
+
+	<!-- XMB™ Menu > Game Category > Data Management (Middle Item) -->
+	<View id="seg_data_management_middle_item">
+		<Attributes>
+			<!-- Memory Card Utility -->
+			<Table key="sdvmc">
+				<Pair key="icon_rsc"><String>item_tex_ps12util</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemSavePS12</String></Pair>
+				<Pair key="title_rsc"><String>msg_memory_card_utility</String></Pair>
+				<Pair key="action"><String>exec_vmcsavedata</String></Pair>
+				<Pair key="child"><String>segment</String></Pair>
+				<Pair key="vmc"><String>promote</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/xmlmcutility" key="sdvmc" attr="sdvmc" src="#sdvmc_2nd" />
+		</Items>
+	</View>
+
+	<!-- XMB™ Menu > Game Category > Data Management (Lower Items) -->
+	<View id="seg_data_management_lower_items">
+		<Attributes>
+		<!-- Saved Data Utility (PS3™) -->
+			 <Table key="sdps3">
+				<Pair key="icon_rsc"><String>item_tex_ps3util</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemSavePS3</String></Pair>
+				<Pair key="title_rsc"><String>msg_savedata_utility_ps3</String></Pair>
+				<Pair key="action"><String>exec_ps3savedata</String></Pair>
+				<Pair key="ms_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps3&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_MS+AGL+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_MS_STD %xCB_MEDIA_TYPE_MS_IOX+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="sd_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps3&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_SD+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="cf_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps3&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_CF+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="mass_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps3&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+AGL+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_USBMASS %xCB_DEVICE_TYPE_USBWM+An+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_ETHER+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="data_connection"><String>xcb://localhost/query?limit=2048&ssort=root.sort_selected.savedata_ps3_all</String></Pair>
+			</Table>
+			<!-- Saved Data Utility (PS2™ Classics) -->
+			 <Table key="sdps2">
+				<Pair key="icon_rsc"><String>item_tex_ps3util</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemSavePS3</String></Pair>
+				<Pair key="title_rsc"><String>msg_savedata_utility_ps2</String></Pair>
+				<Pair key="action"><String>exec_sdps2</String></Pair>
+				<Pair key="ms_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps2&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_MS+AGL+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_MS_STD %xCB_MEDIA_TYPE_MS_IOX+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="sd_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps2&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_SD+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="cf_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps2&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_CF+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="mass_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdps2&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+AGL+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_USBMASS %xCB_DEVICE_TYPE_USBWM+An+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_ETHER+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="data_connection"><String>host://localhost/q?path=</String></Pair>
+			</Table>
+			<!-- Saved Data Utility (PSP™) -->
+			<Table key="sdpsp">
+				<Pair key="icon_rsc"><String>item_tex_psputil</String></Pair>
+				<Pair key="icon_notation"><String>WNT_XmbItemSavedataMinis</String></Pair>
+				<Pair key="title_rsc"><String>msg_savedata_utility_minis_psp</String></Pair>
+				<Pair key="action"><String>exec_pspsavedata</String></Pair>
+				<Pair key="ms_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdpsp&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_MS+AGL+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_MS_STD %xCB_MEDIA_TYPE_MS_IOX+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="sd_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdpsp&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_SD+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="cf_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdpsp&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_CF+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="mass_connection"><String>xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-sdpsp&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+AGL+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_USBMASS %xCB_DEVICE_TYPE_USBWM+An+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_ETHER+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA</String></Pair>
+				<Pair key="data_connection"><String>xcb://localhost/query?limit=2048&ssort=root.sort_selected.savedata_psp_all</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/xmlsavedata-ps3" key="sdps3" attr="sdps3"/>
+			<Query class="type:x-xmb/xmlsavedata-ps2" key="sdps2" attr="sdps2"/>
+			<Query class="type:x-xmb/xmlsavedata-psp" key="sdpsp" attr="sdpsp"/>
+		</Items>
+	</View>
+
+	<!-- PS™Vita System Application Utility > PS™Vita Content -->
+	<View id="seg_psp2appdata_vita">
+		<Attributes>
+			<Table key="psp2appdata_vita">
+				<Pair key="title_rsc"><String>msg_applications_vita</String></Pair>
+				<Pair key="type"><String>vita</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/xmlpsp2appdata-cont" key="psp2appdata_vita" attr="psp2appdata_vita"/>
+		</Items>
+	</View>
+
+	<!-- PS™Vita System Application Utility > Applications (PSP™/Other) -->
+	<View id="seg_psp2appdata_psp">
+		<Attributes>
+			<Table key="psp2appdata_psp">
+				<Pair key="title_rsc"><String>msg_applications_psp_other</String></Pair>
+				<Pair key="type"><String>psp</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/xmlpsp2appdata-cont" key="psp2appdata_psp" attr="psp2appdata_psp"/>
+		</Items>
+	</View>
+
+	<!-- PS™Vita System Application Utility > Applications (PS1™) -->
+	<View id="seg_psp2appdata_ps1">
+		<Attributes>
+			<Table key="psp2appdata_ps1">
+				<Pair key="title_rsc"><String>msg_applications_ps1</String></Pair>
+				<Pair key="type"><String>ps1</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/xmlpsp2appdata-cont" key="psp2appdata_ps1" attr="psp2appdata_ps1"/>
+		</Items>
+	</View>
+
+	<!-- PS™Vita System Application Utility > Applications (PlayStation®Mobile) -->
+	<View id="seg_psp2appdata_psm">
+		<Attributes>
+			<Table key="psp2appdata_psm">
+				<Pair key="title_rsc"><String>msg_applications_psm</String></Pair>
+				<Pair key="type"><String>psm</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/xmlpsp2appdata-cont" key="psp2appdata_psm" attr="psp2appdata_psm"/>
+		</Items>
+	</View>
+
+	<!-- Game Data Utility > -->
+	<View id="seg_gamedata_items">
+		<Attributes>
+			<Table key="focus_item">
+				<Pair key="focus_priority"><String>-80</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/folder-pixmap" key="gamedata" attr="focus_item" src="xcb://localhost/query?limit=2048&table=MMS_MEDIA_TYPE_HDD&sort=+Game:Common.titleForSort&cond=AGL+Game:Game.titleId BC0000000 BLZZZZZZZ+OgL+Game:Game.titleId NP0000000 NPZZZZZZZ+An+Game:Game.titleId BLACK0STR+Ae+Game:Game.category GD+An+Game:Game.category 2D"/>
+			<Query class="type:x-xmb/folder-pixmap" key="unofficial_stores_data" src="xmb://localhost/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/online/unofficial_stores/unofficial_stores.xml#seg_unofficial_stores_data"/>
+		</Items>
+	</View>
+
+	<!-- Saved Data Utility (PS3™) > Online Storages and Tools -->
+	<View id="seg_sdplus">
+		<Attributes>
+			<!-- PlayStation Plus Cloud Storage (PS Plus Members) -->
+			<Table key="playstation_plus_cloud_storage">
+				<Pair key="icon_rsc"><String>item_tex_online_storage</String></Pair>
+				<Pair key="title_rsc"><String>msg_online_storage</String></Pair>
+			</Table>		
+			<!-- Google Cloud Storage (Free Service) -->
+			<Table key="google_cloud_storage">
+				<Pair key="icon"><String>/dev_flash/vsh/resource/explore/icon/google_cloud_storage.png</String></Pair>
+				<Pair key="title_rsc"><String>msg_google_cloud_storage</String></Pair>
+				<Pair key="info_rsc"><String>info_google_cloud_storage_backup</String></Pair>
+				<Pair key="fo_lbl_alpha"><String>0</String></Pair>
+				<Pair key="fo_lbl2_alpha"><String>0</String></Pair>
+				<Pair key="child"><String>segment</String></Pair>
+			</Table>
+			<!-- Saved Data Converter -->
+			<Table key="convert_saved_data">
+				<Pair key="icon"><String>/dev_flash/vsh/resource/explore/icon/convert_save.png</String></Pair>
+				<Pair key="title_rsc"><String>msg_convert_savedata</String></Pair>
+				<Pair key="info_rsc"><String>info_convert_savedata_manager</String></Pair>
+				<Pair key="module_name"><String>xai_plugin</String></Pair>
+				<Pair key="module_action"><String>patch_savedata</String></Pair>
+				<Pair key="bar_action"><String>none</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/xmlsavedata-plus" key="playstation_plus_cloud_storage" attr="playstation_plus_cloud_storage"/>
+			<Query class="type:x-xmb/folder-pixmap" key="google_cloud_storage" attr="google_cloud_storage" src="#seg_google_cloud_storage_items"/>
+			<Item class="type:x-xmb/module-action" key="convert_saved_data" attr="convert_saved_data"/>
+		</Items>
+	</View>
+
+	<View id="seg_google_cloud_storage_items">
+		<Items>
+			<Query class="type:x-xmb/folder-pixmap" key="google_cloud_storage" src="xcb://localhost/query?sort=+Game:Common.titleForSort&cond=Oe+Game:Game.titleId GCLOUDSTO+Ae+Game:Game.category HM"/>
+			<Query class="type:x-xmb/folder-pixmap" key="google_cloud_storage_downloader" src="xcb://localhost/exists?having=off&rquery=root.fixed_items.google_cloud_storage&cond=Ae+Game:Common.dirPath /dev_hdd0/game+Ae+Game:Common.fileName GCLOUDSTO"/>
+		</Items>
+	</View>
+
+	<View id="seg_google_cloud_storage">	
+		<Attributes>
+			<Table key="google_cloud_storage_download">
+				<Pair key="info"><String>net_package_install</String></Pair>
+				<Pair key="pkg_src"><String>http://github.com/PS3-4K-Pro/Packages/releases/download/Homebrews/Google_Cloud_Storage.pkg</String></Pair>
+				<Pair key="content_name"><String>msg_install</String></Pair>
+				<Pair key="content_id"><String>CUSTOM-GCLOUDSTO_00-0000000000000000</String></Pair>
+				<Pair key="prod_pict_path"><String>/dev_flash/vsh/resource/explore/icon/download.png</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/xmlnpsignup" key="google_cloud_storage_download" attr="google_cloud_storage_download"/>
+		</Items>
+	</View>
+
+	<!-- Game Exit (In-Game) -->
+	<View id="seg_gameexit">
+		<Items>
+			<Item class="type:x-xmb/xmlgameexit" key="gameexit"/>
+		</Items>
+	</View>
+
+	<!-- Manual (In-Game) -->
+	<View id="seg_manual">
+		<Attributes>
+			<Table key="manual">
+				<Pair key="icon_rsc"><String>tex_manual</String></Pair>
+				<Pair key="title_rsc"><String>msg_soft_manual</String></Pair>
+				<Pair key="module_name"><String>game_plugin</String></Pair>
+				<Pair key="module_action"><String>manual</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/module-action" key="manual" attr="manual"/>
+		</Items>
+	</View>
+
+	<!-- Memory Card Utility > -->
+	<View id="sdvmc_2nd">
+		<Attributes>
+			<Table key="seg_newvmc">
+				<Pair key="focus_priority"><String>-1</String></Pair>
+			</Table>
+			<!-- Create New Internal Memory Card -->
+			<Table key="sdvmc">
+				<Pair key="icon_rsc"><String>item_tex_ps12util</String></Pair>
+				<Pair key="action"><String>exec_vmcsavedata</String></Pair>
+				<Pair key="focus_priority"><String>-2</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<!-- Storage Medias -->
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_device_ms" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psv&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_MS+AGL+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_MS_STD %xCB_MEDIA_TYPE_MS_IOX+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA"/>
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_device_sd" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psv&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_SD+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA"/>
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_device_cf" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psv&sort=+StorageMedia:StorageMedia.sortOrder&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_CF+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA"/>
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_device_usbmass" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psv&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+AGL+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_USBMASS %xCB_DEVICE_TYPE_USBWM+An+StorageMedia:StorageMedia.deviceType %xCB_DEVICE_TYPE_ETHER+Ae+StorageMedia:StorageMedia.mediaFormat %xCB_MEDIA_FORMAT_DATA"/>
+			<!-- PS1™/PS2™ Memory Card Adpter -->
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_seg_device_usb_ps2mc" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psmc&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_PS2MC"/>
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_seg_device_usb_ps1mc" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psmc&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_PS1MC"/>
+			<Query class="type:x-xmb/folder-pixmap" key="vmc_seg_device_usb_pda" src="xcb://localhost/query?table=MMS_MEDIA_TYPE_SYSTEM&subclass=x-xcb/storagemedia-psmc&sort=+StorageMedia:StorageMedia.sortOrder+StorageMedia:StorageMedia.timeInserted&genre=Game&cond=Ae+StorageMedia:StorageMedia.stat.mediaStatus %xCB_MEDIA_INSERTED+Ae+StorageMedia:StorageMedia.type %xCB_MEDIA_TYPE_PDA"/>
+			<Query class="type:x-xmb/folder-pixmap" key="seg_newvmc" attr="seg_newvmc" src="#seg_newvmc"/>
+			<Query class="type:x-xmb/folder-pixmap" key="sdvmc" attr="sdvmc" src="xcb://localhost/query?limit=2048&ssort=root.sort_selected.vmc_all&genre=Game&cond=Aa+Vmc:Common.title"/>
+		</Items>
+	</View>
+
+	<!-- Create Virtual Memory Card -->
+	<View id="seg_newvmc">
+		<Attributes>
+			<Table key="new_vmc">
+				<Pair key="title_rsc"><String>msg_new_vmc</String></Pair>
+				<Pair key="info"><String>new_vmc</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Item class="type:x-xmb/vmc-new" key="new_vmc" attr="new_vmc"/>
+		</Items>
+	</View>
+
+	<!-- Create Virtual Memory Card (Copy From Adaptor) -->
+	<View id="sdvmc_copy_newvmc">
+		<Attributes>
+			<Table key="copy_new_vmc">
+				<Pair key="title_rsc"><String>msg_new_vmc</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/folder-pixmap" key="copy_new_vmc" attr="copy_new_vmc"/>
+		</Items>
+	</View>
+
+	<!-- XMB™ Menu > Game Category > File Manager > Settings > Components -->
+	<View id="seg_pro_components_game_folders">
+		<Attributes>
+			<!-- Game Folders Components -->
+			<Table key="pro_components_game_folders">
+				<Pair key="icon"><String>/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/icons/toggle_game_folder.png</String></Pair>
+				<Pair key="title_rsc"><String>msg_game_folders</String></Pair>
+				<Pair key="info_rsc"><String>info_pro_components_toolbox</String></Pair>
+			</Table>
+		</Attributes>
+		<Items>
+			<Query class="type:x-xmb/folder-pixmap" key="pro_components_game_folders" attr="pro_components_game_folders" src="xmb://localhost/dev_hdd0/game/PS34KPROX/USRDIR/toolbox/xmls/settings/sub_items/components/game_folder_components/game_folder_components_HFW_items.xml#seg_pro_components_game_folders_items"/>
+		</Items>
+	</View>
+
+<!-- Fix: This avoids the category being replaced when updating webMAN version, webMAN just checks for its existence and it must have this exactly bytes.
+
+			<Query
+				class="type:x-xmb/folder-pixmap"
+				key="xmb_app3" 
+				attr="xmb_app3" 
+				src="xmb://localhost/dev_hdd0/xmlhost/game_plugin/fb.xml#seg_fb"
+				/>
+
+-->
+</XMBML>
