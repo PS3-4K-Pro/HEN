@@ -31,6 +31,10 @@ A exploit that allows the console to run unsigned code.<br>
  
 <details><summary>Spoiler</summary>
 
+ <br>
+ 
+<details><summary>v3.x.x</summary>
+ 
 # v3.3.3 (Exclusive)
 ### Payload:
 -Added: Automatic XMB™ reload if more than one user exists.<br>
@@ -174,6 +178,10 @@ A exploit that allows the console to run unsigned code.<br>
 -Fixed: Freeze problems on all models.<br>
 -Fixed: Issues with incompatible models.<br>
 -Improved: Sanity checks.<br>
+
+</details>
+
+<details><summary>v2.x.x</summary>
 
 # v2.4.0
 ### Global:
@@ -353,6 +361,10 @@ Resource
 -Improved: PS3MAPI support can now read/set process mem using webMAN.<br>
 -Remoced: Fake flash is no longer used, in favor of on-the-fly patching.<br>
 
+</details>
+
+<details><summary>v1.x.x</summary>
+
 # v1.0.0
 ### Payload:
 -Added: BD/DVD Region patches.<br>
@@ -368,6 +380,7 @@ Resource
 -Added: Support for Homebrew resigned with 3.55 keys and lower.<br>
 -Added: Syscall 6,7,8,15.<br>
 
+</details> 
 </details> 
  
 # Credits
