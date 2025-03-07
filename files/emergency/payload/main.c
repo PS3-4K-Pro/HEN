@@ -35,7 +35,7 @@
 #include "qa.h"
 #include "homebrew_blocker.h"
 #include "make_rif.h"
-		 
+
 // Format of version:
 // byte 0, 7 MS bits -> reserved
 // byte 0, 1 LS bit -> 1 = CFW version, 0 = OFW/exploit version
@@ -61,7 +61,7 @@
 
 #define COBRA_VERSION		0x0F
 #define COBRA_VERSION_BCD	0x0850
-#define HEN_REV				0x0333
+#define HEN_REV				0x0350
 
 #if defined(FIRMWARE_4_80)
 	#define FIRMWARE_VERSION	0x0480
@@ -90,7 +90,9 @@
 #elif defined(FIRMWARE_4_90)
 	#define FIRMWARE_VERSION	0x0490	
 #elif defined(FIRMWARE_4_91)
-	#define FIRMWARE_VERSION	0x0491	
+	#define FIRMWARE_VERSION	0x0491
+#elif defined(FIRMWARE_4_92)
+	#define FIRMWARE_VERSION	0x0492	
 #endif
 
 #if defined(CFW)
@@ -211,12 +213,12 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,bnet_ioctl,(int socket,uint32_t flags, v
 		int path_len=strlen(path);
 		if(strstr(path,".rif"))
 		{
-			DPRINTF("RIF fd open called:%s\n",path);
+			//DPRINTF("RIF fd open called:%s\n",path);
 			rif_fd=*fd;
 		}
 		else if(strstr(path,"act.dat"))
 		{
-			DPRINTF("act.dat fd open called:%s\n",path);
+			//DPRINTF("act.dat fd open called:%s\n",path);
 			act_fd=*fd;
 		}
 		else if((strstr(path,".edat")) || (strstr(path,".EDAT")) || (strstr(path,"ISO.BIN.ENC")) || (strstr(path+path_len-7,"CONFIG")))
@@ -379,10 +381,10 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 	{
 		if(rif_fd==fd)
 		{
-			DPRINTF("RIF fd read called:%x %p %016lx %p\n",fd,buf,nbytes,nread);
+			//DPRINTF("RIF fd read called:%x %p %016lx %p\n",fd,buf,nbytes,nread);
 			if(*nread==0x98)
 			{
-				DPRINTF("generating rif ECDSA\n");
+				//DPRINTF("generating rif ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x98, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x98);
@@ -400,10 +402,10 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 		}
 		else if(act_fd==fd)
 		{
-			DPRINTF("act fd read called:%x %p %016lx %p\n\n",fd,buf,nbytes,nread);
+			//DPRINTF("act fd read called:%x %p %016lx %p\n\n",fd,buf,nbytes,nread);
 			if(*nread==0x1038)
 			{
-				DPRINTF("generating act ECDSA\n");
+				//DPRINTF("generating act ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x1038, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x1038);
@@ -423,7 +425,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 		{
 			if(*nread==0x100)
 			{
-				DPRINTF("generating misc ECDSA\n");
+				//DPRINTF("generating misc ECDSA\n");
 				uint8_t *buf1;
 				page_allocate_auto(NULL, 0x100, 0x2F, (void*)&buf1);
 				memcpy(buf1,buf,0x100);
@@ -474,7 +476,9 @@ LV2_SYSCALL2(uint64_t, sys_cfw_peek, (uint64_t *addr))
 	/* if (block_peek)
 		return (uint64_t)ENOSYS; */
 
-	//DPRINTF("peek %p\n", addr);
+	/* #ifdef DEBUG
+		//DPRINTF("peek %p\n", addr);
+	#endif */
 
 	uint64_t ret = *addr;
 
@@ -487,7 +491,9 @@ void _sys_cfw_poke(uint64_t *addr, uint64_t value);
 
 LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 {
-	DPRINTF("New poke called\n");
+	#ifdef DEBUG
+		DPRINTF("New poke called\n");
+	#endif
 
 	_sys_cfw_poke(addr, value);
 	asm volatile("icbi 0,%0; isync" :: "r"(addr));
@@ -534,7 +540,9 @@ LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
 
 LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len))
 {
-	DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
+	#ifdef DEBUG
+		DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
+	#endif
 
 	if (len == 8)
 	{
@@ -553,7 +561,9 @@ LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len)
 
 LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 {
-	DPRINTF("LV2 poke %p %016lx\n", ptr, value);
+	#ifdef DEBUG
+		DPRINTF("LV2 poke %p %016lx\n", ptr, value);
+	#endif
 	uint64_t addr=(uint64_t)ptr;
 	if (addr >= MKA(syscall_table_symbol))
 	{
@@ -566,14 +576,19 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 
 			if (((value == sc_null) ||(value == syscall_not_impl)) && (syscall_num != 8)) //Allow removing protected syscall 6 7 9 10 35 NOT 8
 			{
-				DPRINTF("HB remove syscall %ld\n", syscall_num);
+				#ifdef DEBUG
+					DPRINTF("HB remove syscall %ld\n", syscall_num);
+				#endif
 				*ptr=value;
 				return;
 			}
 			else //Prevent syscall 6 7 9 10 and 35 from being re-written
 			{
-				DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
+				#ifdef DEBUG
+					DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
+				#endif
 				return;
+		   
 			}
 		}
 	}
@@ -616,7 +631,9 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 
 LV2_SYSCALL2(void, sys_cfw_lv1_poke, (uint64_t lv1_addr, uint64_t lv1_value))
 {
-	DPRINTF("LV1 poke %p %016lx\n", (void*)lv1_addr, lv1_value);
+	#ifdef DEBUG
+		DPRINTF("LV1 poke %p %016lx\n", (void*)lv1_addr, lv1_value);
+	#endif
 	lv1_poked(lv1_addr, lv1_value);
 }
 
@@ -690,7 +707,9 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 {
 	extend_kstack(0);
 
-	DPRINTF("Syscall 8 -> %lx\n", function);
+	#ifdef DEBUG
+		DPRINTF("Syscall 8 -> %lx\n", function);
+	#endif
 
 	// -- AV: temporary disable cobra syscall (allow dumpers peek 0x1000 to 0x9800)
 	static uint8_t tmp_lv1peek = 0;
@@ -764,7 +783,9 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 		case SYSCALL8_OPCODE_PS3MAPI:
 			switch ((int)param1)
 			{
-				DPRINTF("syscall8: PS3M_API function 0x%x\n", (int)param1);
+				#ifdef DEBUG
+					DPRINTF("syscall8: PS3M_API function 0x%x\n", (int)param1);
+				#endif
 
 				//----------
 				//CORE
@@ -937,7 +958,9 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				//DEFAULT
 				//----------
 				default:
-					DPRINTF("syscall8: Unsupported PS3M_API opcode: 0x%lx\n", function);
+					#ifdef DEBUG
+						DPRINTF("syscall8: Unsupported PS3M_API opcode: 0x%lx\n", function);
+					#endif
 					return ENOSYS;
 				break;
 			}
@@ -1153,7 +1176,9 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 
 	}
 
-	DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
+	#ifdef DEBUG
+		DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
+	#endif
 	return ENOSYS;
 }
 
@@ -1247,7 +1272,7 @@ static INLINE void apply_kernel_patches(void)
 		hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
 	#endif
 	
-	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90) || defined (FIRMWARE_4_91)
+	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90) || defined (FIRMWARE_4_91) || defined (FIRMWARE_4_92)
 		hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 		hook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
 	#endif
@@ -1317,39 +1342,6 @@ static void check_combo_buttons(void)
 }
 */
 
-/* Check if HEN is being installed and if true, rename boot_plugins.txt
-void is_hen_being_installed(void)
-{
-	int fd;
-	uint32_t* read_bytes = (uint32_t*)0x89FFFF00;
-	
-	if(((unsigned int)*read_bytes)==(0x48454E00))
-	{
-		#ifdef DEBUG
-			DPRINTF("PAYLOAD->HEN is being installed\n");
-			//DPRINTF("PAYLOAD->read_bytes value: %08X\n", (unsigned int)*read_bytes);
-		#endif
-		
-		// Rename Boot Plugins Text Files Temporarily
-		#ifdef DEBUG
-			DPRINTF("PAYLOAD->Temporarily Disabling Boot Plugin Files\n");
-		#endif
-		cellFsRename("/dev_hdd0/boot_plugins.txt", "/dev_hdd0/boot_plugins.hen");
-		cellFsRename("/dev_hdd0/boot_plugins_kernel.txt", "/dev_hdd0/boot_plugins_kernel.hen");
-		
-		// Create temp file for henplugin to read, to show message
-		cellFsOpen("/dev_hdd0/tmp/installer.active", CELL_FS_O_CREAT | CELL_FS_O_RDWR, &fd, 0777, NULL, 0);
-		cellFsClose(fd);
-	}
-	else
-	{
-		#ifdef DEBUG
-			DPRINTF("PAYLOAD->HEN is NOT being installed\n");
-		#endif
-	}
-}
-*/
-
 extern volatile int sleep_done;
 
 int main(void)
@@ -1393,7 +1385,7 @@ int main(void)
 	}
 	
 	*/ 
-	
+
 	/* File and folder redirections using mappath mappings
 	if(mappath_disabled==0)
 	{
@@ -1572,10 +1564,7 @@ int main(void)
 	do_hook_all_syscalls();
 	memset((void *)MKA(0x7e0000),0,0x100);
 	memset((void *)MKA(0x7f0000),0,0x1000);
-	
-	// Check if HEN is being installed and if true, rename boot_plugins.txt
-	//is_hen_being_installed();
-	
+
 	if(boot_plugins_disabled==0)
 	{
 		

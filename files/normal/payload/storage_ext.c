@@ -848,12 +848,12 @@ int process_proxy_cmd(uint64_t command, process_t process, uint8_t *buf, uint64_
 		}
 	}
 
-	#ifdef DEBUG
+	/* #ifdef DEBUG
 	if (ret != SUCCEEDED)
 	{
 		DPRINTF("proxy read failed: %x\n", ret);
 	}
-	#endif
+	#endif */
 
 	return ret;
 }
@@ -1085,7 +1085,7 @@ int enable_patches()
 		
 		hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
 		
-		#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_90) || defined(FIRMWARE_4_91)
+		#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_90) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 			hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 			hook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
 		#endif
@@ -1101,7 +1101,7 @@ int disable_patches()
 	suspend_intr();
 	do_patch32(MKA(patch_func8_offset1),0x7FE307B4);
 	
-	#if defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+	#if defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 		do_patch32(MKA(patch_func8_offset2),0x48216FB5);
 		do_patch32(MKA(lic_patch),0x48240EED); // ignore LIC.DAT check
 		
@@ -1145,7 +1145,7 @@ int disable_patches()
 	unhook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
 	//remove_pokes();
 		
-	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_90) || defined(FIRMWARE_4_91)
+	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_90) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 		suspend_intr();
 		unhook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 		unhook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
@@ -1628,7 +1628,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_8(int, emu_read_bdvd0, (void *object, uint64_t
 
 	if (disc_emulation != EMU_OFF)
 	{
-	#ifdef DEBUG
+	/* #ifdef DEBUG
 		DPRINTF("Warning: emu_read_bdvd0 called.\n");
 		dump_stack_trace2(16);
 
@@ -1638,7 +1638,7 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_8(int, emu_read_bdvd0, (void *object, uint64_t
 			//dump_stack_trace2(16);
 			fatal("aborting.\n");
 		}
-	#endif
+	#endif */
 	ret = do_read_iso(buf, offset, size);
 
 	}
@@ -2008,17 +2008,17 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 
 			if (GET_FORMAT(cmd) != FORMAT_TOC)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Requesting something other than TOC: %d!!\nPassing command to real function.", GET_FORMAT(cmd));
-				#endif
+				#endif */
 				return 0;
 			}
 
 			if (GET_MSF(cmd))
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Warning: requesting tracks in MSF format. Not implemented.\n");
-				#endif
+				#endif */
 				return -1;
 			}
 
@@ -2035,12 +2035,12 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 				resp->first_track = 1;
 				resp->last_track = numtracks;
 
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 				if (cmd->track_session_num > numtracks)
 				{
 					DPRINTF("Track out of range %d\n", cmd->track_session_num);
 				}
-				#endif
+				#endif */
 
 				if (cmd->track_session_num > 1)
 				{
@@ -2135,17 +2135,17 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 
 			if (is2048)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("READ TRACK INFORMATION not implemented for 2048 cd iso!\n");
-				#endif
+				#endif */
 				return -1;
 			}
 
 			if (cmd->rv_o_type != 1)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("rv_o_type = %x, not implemented\n", cmd->rv_o_type);
-				#endif
+				#endif */
 				return -1;
 			}
 
@@ -2153,9 +2153,9 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 
 			if (cmd->lba_tsn == 0 || cmd->lba_tsn > numtracks)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Invalid track %d\n", cmd->lba_tsn);
-				#endif
+				#endif */
 				return -1;
 			}
 
@@ -2258,25 +2258,25 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 
 			else if (cmd->misc != 0xF8 && cmd->misc != 0x10)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Unexpected value for misc: %02X\n", cmd->misc);
-				#endif
+				#endif */
 				return -1;
 			}
 
 			if (cmd->rv_scsb != 0 && cmd->rv_scsb != 2)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Unexpected value for subchannel: %02X\n", cmd->rv_scsb);
-				#endif
+				#endif */
 				return -1;
 			}
 
 			if (GET_EXPECTED_SECTOR_TYPE(cmd) != 0)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Unexpected value for expected sector type: %d\n", GET_EXPECTED_SECTOR_TYPE(cmd));
-				#endif
+				#endif */
 				return -1;
 			}
 
@@ -2286,9 +2286,9 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 
 			if (is2048)
 			{
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("Read CD on 2048 iso (lba=0x%x, length=0x%x)!!! Not implemented.\n", lba, length);
-				#endif
+				#endif */
 				return 0; // Fallback to real disc, let's see what happens :)
 			}
 
@@ -2306,12 +2306,12 @@ int process_cd_iso_scsi_cmd(uint8_t *indata, uint64_t inlen, uint8_t *outdata, u
 				outsize += (length*sizeof(SubChannelQ));
 			}
 
-			#ifdef DEBUG
+			/* #ifdef DEBUG
 			if (outsize == 0)
 			{
 				DPRINTF("Warning: outsize is zero\n");
 			}
-			#endif
+			#endif */
 
 			if (outsize > outlen)
 			{
@@ -2491,7 +2491,7 @@ static INLINE void do_video_mode_patch(void)
 			#if defined (FIRMWARE_4_80)
 				process_write_memory(vsh_process, (void *)0x4531E4, &patch, 4, 1);	
 				
-			#elif defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+			#elif defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 				process_write_memory(vsh_process, (void *)0x4531DC, &patch, 4, 1);
 				
 			#elif defined (FIRMWARE_4_90)
@@ -2531,9 +2531,9 @@ int process_cmd(unsigned int command, void *indata, uint64_t inlen, void *outdat
 				ret = (ret << 32) | 2048;
 				memset(outdata, 0, outlen);
 				memcpy(outdata, &ret, (sizeof(ret) > outlen) ? sizeof(ret) : outlen);
-				#ifdef DEBUG
+				/* #ifdef DEBUG
 					DPRINTF("FAKING to %16lx\n", ret);
-				#endif
+				#endif */
 				return 1;
 			}
 		break;
@@ -3183,7 +3183,9 @@ LV2_HOOKED_FUNCTION(int, shutdown_copy_params_patched, (uint8_t *argp_user, uint
 				}
 				else
 				{
-					DPRINTF("NPDRM game, skipping ps2emu preparation\n");
+					/* #ifdef DEBUG
+						DPRINTF("NPDRM game, skipping ps2emu preparation\n");
+					#endif */
 				}
 
 			}
@@ -3719,9 +3721,9 @@ int sys_storage_ext_get_emu_state(sys_emu_state_t *state)
 
 	if (state->size != sizeof(sys_emu_state_t))
 	{
-		#ifdef DEBUG
+		/* #ifdef DEBUG
 			DPRINTF("Unknown structure size: %d, expected %ld\n", state->size, sizeof(sys_emu_state_t));
-		#endif
+		#endif */
 		return EINVAL;
 	}
 
@@ -3907,18 +3909,18 @@ cd_sector_size = (trackscount & 0xffff00)>>4; //  <- Use: trackscount = num_of_t
 				ret = event_port_connect(proxy_result_port, proxy_result_queue);
 				if (ret != SUCCEEDED)
 				{
-					#ifdef DEBUG
+					/* #ifdef DEBUG
 						DPRINTF("Failed in connecting proxy result port/queue: %x\n", ret);
-					#endif
+					#endif */
 					event_port_disconnect(proxy_command_port);
 				}
 			}
-			#ifdef DEBUG
+			/* #ifdef DEBUG
 			else
 			{
 				DPRINTF("Failed in connecting proxy command port/queue: %x\n", ret);
 			}
-			#endif
+			#endif */
 
 			if (ret != SUCCEEDED)
 			{
@@ -3931,12 +3933,12 @@ cd_sector_size = (trackscount & 0xffff00)>>4; //  <- Use: trackscount = num_of_t
 
 		close_kernel_object_handle(table, p);
 	}
-	#ifdef DEBUG
+	/* #ifdef DEBUG
 	else
 	{
 		DPRINTF("Cannot open even port %x (ret=%x)\n", result_port, ret);
 	}
-	#endif
+	#endif */
 
 	if (ret == SUCCEEDED)
 	{
@@ -3977,7 +3979,7 @@ cd_sector_size = (trackscount & 0xffff00)>>4; //  <- Use: trackscount = num_of_t
 void storage_ext_init(void)
 {
 	thread_t dispatch_thread;
-	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", "/dev_update", 0, 0, 0, 0, 0);
+	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", "/dev_rewrite", 0, 0, 0, 0, 0);
 	get_vsh_proc();
 	ps2emu_type = get_ps2emu_type();
 	mutex_create(&mutex, SYNC_PRIORITY, SYNC_NOT_RECURSIVE);
@@ -4021,7 +4023,7 @@ void storage_ext_init(void)
 		patch64=0x386000014e800020;
 		process_write_memory(vsh_process, (void *)0x5fc594, &patch64, 8, 1);
 
-	#elif defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+	#elif defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 		uint64_t patch64=0x386000004e800020;
 		uint32_t patch32=0x38600000;
 		process_write_memory(vsh_process, (void *)0x253250, &patch64, 8, 1);
@@ -4083,7 +4085,7 @@ void storage_ext_patches(void)
 
 void unhook_all_storage_ext(void)
 {
-#if defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+#if defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 	*(uint32_t *)MKA(device_event_port_send_call)=0x4BD91004;
 	*(uint32_t *)MKA(shutdown_copy_params_call)=0x48004FBD;
 	

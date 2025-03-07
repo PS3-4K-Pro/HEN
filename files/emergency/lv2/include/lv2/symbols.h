@@ -3,7 +3,7 @@
 #ifndef __FIRMWARE_SYMBOLS_H_S__
 #define __FIRMWARE_SYMBOLS_H_S__
 
-#if defined(FIRMWARE_4_81) || defined(FIRMWARE_4_82) || defined(FIRMWARE_4_83)|| defined(FIRMWARE_4_84)|| defined(FIRMWARE_4_85)|| defined(FIRMWARE_4_86)|| defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+#if defined(FIRMWARE_4_81) || defined(FIRMWARE_4_82) || defined(FIRMWARE_4_83)|| defined(FIRMWARE_4_84)|| defined(FIRMWARE_4_85)|| defined(FIRMWARE_4_86)|| defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 
 #define TOC 											0x34FBB0
 
@@ -111,9 +111,7 @@
 #define cellFsWrite_symbol								0x297810
 #define cellFsLseek_symbol								0x296E98
 #define cellFsStat_symbol								0x29711C
-										   
 #define cellFsUtime_symbol 								0x298C08
-													 
 #define cellFsRename_internal_symbol 				    0x197104
 #define cellFsUnlink_internal_symbol   		 			0x19C64C
 
@@ -396,15 +394,13 @@
 #define cellFsOpen_symbol								0x2B2898
 #define cellFsClose_symbol								0x2B2700
 #define cellFsRead_symbol								0x2B283C
-#define cellFsMkdir_symbol 								0x2B40B8
+#define cellFsMkdir_symbol 								0x2B20B4
 #define cellFsWrite_symbol								0x2B27A8
 #define cellFsLseek_symbol								0x2B1FFC
 #define cellFsStat_symbol								0x2B20B4
-										   
 #define cellFsUtime_symbol 								0x2B3A24
 #define cellFsRename_internal_symbol 				    0x19D490
 #define cellFsUnlink_internal_symbol   		 			0x1A29D8
-													 
 
 #define cellFsUtilMount_symbol							0x2B1D70
 #define cellFsUtilUmount_symbol 						0x2B1D44
@@ -695,7 +691,6 @@
 #define cellFsStat_symbol								0x297110
 #define cellFsMkdir_symbol 								0x299094
 #define cellFsUtime_symbol 								0x298BFC
-													 
 #define cellFsRename_internal_symbol 				    0x1970FC
 #define cellFsUnlink_internal_symbol   		 			0x19C644
 

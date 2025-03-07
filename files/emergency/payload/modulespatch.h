@@ -451,8 +451,8 @@
 #define bt_usb_audio_offset				0xF80
 
 
-// 4.83 - 4.89 + 4.91 CEX Firmware
-#elif defined(FIRMWARE_4_83) || defined(FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91)
+// 4.83 - 4.89 + 4.91 + 4.92 CEX Firmware
+#elif defined(FIRMWARE_4_83) || defined(FIRMWARE_4_84) || defined(FIRMWARE_4_85) || defined(FIRMWARE_4_86) || defined(FIRMWARE_4_87) || defined(FIRMWARE_4_88) || defined(FIRMWARE_4_89) || defined(FIRMWARE_4_91) || defined(FIRMWARE_4_92)
 
 #define BDP_DISC_CHECK_PLUGIN_HASH		0xb8b7a5f900003000
 #define EXPLORE_PLUGIN_HASH				0xacf4af2b000ec000
@@ -670,7 +670,7 @@
 #define app_home_offset					0x250910 // Retail
 #define ps2_nonbw_offset				0xDD9B4 // Retail
 
-/*4.90 
+/*4.90+
 #define app_home_offset      			0x250720
 #define ps2_nonbw_offset      			0xDD9BC */
 #define whatsnew_offset					0x26E9B0

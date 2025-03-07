@@ -26,7 +26,6 @@ static unsigned char RAP_E1[] =   { 0xA9, 0x3E, 0x1F, 0xD6, 0x7C, 0x55, 0xA3, 0x
 static unsigned char RAP_E2[] =   { 0x67, 0xD4, 0x5D, 0xA3, 0x29, 0x6D, 0x00, 0x6A, 0x4E, 0x7C, 0x53, 0x7B, 0xF5, 0x53, 0x8C, 0x74 };
 //static unsigned char no_exists[] = {"/fail"};
 
-uint32_t userID;
 uint8_t skip_existing_rif = 0;
 uint8_t account_id[ACC_SIZE];
 
@@ -140,9 +139,9 @@ static void read_act_dat_and_make_rif(uint8_t *rap, uint8_t *act_dat, const char
 {
 	int fd;
 
-	#ifdef DEBUG
+	/* #ifdef DEBUG
 		DPRINTF("Creating %s\n", rif_path);
-	#endif
+	#endif */
 
 	if(cellFsOpen(rif_path, CELL_FS_O_WRONLY | CELL_FS_O_CREAT | CELL_FS_O_TRUNC, &fd, 0666, NULL, 0) == CELL_FS_SUCCEEDED)
 	{
@@ -190,9 +189,9 @@ static void read_act_dat_and_make_rif(uint8_t *rap, uint8_t *act_dat, const char
 		cellFsWrite(fd, rif, 0x98, &size);
 		cellFsClose(fd);
 		
-		#ifdef DEBUG
+		/* #ifdef DEBUG
 			DPRINTF("created: %s\n", rif_path);
-		#endif
+		#endif */
 	}
 }
 
@@ -203,9 +202,9 @@ static int create_act_dat(const char *userid)
 	char full_path[120], exdata_dir[120];
 	CellFsStat stat;
 
-	#ifdef DEBUG
+	/* #ifdef DEBUG
 		DPRINTF("Creating act.dat for userID %s...\n", userid);
-	#endif
+	#endif */
 
 	uint8_t timedata[0x10] =
 	{
@@ -240,9 +239,9 @@ static int create_act_dat(const char *userid)
 		cellFsWrite(fd, actdat, 0x1038, &size);
 		cellFsClose(fd);
 
-		#ifdef DEBUG
+		/* #ifdef DEBUG
 			DPRINTF("created: %s\n", full_path);
-		#endif
+		#endif */
 	}
 
 	free(actdat);
@@ -257,7 +256,7 @@ static int read_rap_bin(const char* bin_file_path, const char* content_id, uint8
     int ret = cellFsOpen(bin_file_path, CELL_FS_O_RDONLY, &fd, 0, NULL, 0);
     if (ret != CELL_FS_SUCCEEDED) {
         #ifdef DEBUG
-            DPRINTF("PAYLOAD->read_rap_bin->Failed to open %s\n", bin_file_path);
+            DPRINTF("read_rap_bin->%s not found\n", bin_file_path);
         #endif
         return 0;
     }
@@ -272,7 +271,7 @@ static int read_rap_bin(const char* bin_file_path, const char* content_id, uint8
             memcpy(rap_value, buffer + 0x40, KEY_SIZE);
             cellFsClose(fd);
             #ifdef DEBUG
-                DPRINTF("PAYLOAD->read_rap_bin->Found RAP for content_id: %s\n", content_id);
+                DPRINTF("read_rap_bin->Found RAP for content_id: %s\n", content_id);
             #endif
             return 1;
         }
@@ -280,7 +279,7 @@ static int read_rap_bin(const char* bin_file_path, const char* content_id, uint8
 
     cellFsClose(fd);
     #ifdef DEBUG
-        DPRINTF("PAYLOAD->read_rap_bin->Content ID %s not found\n", content_id);
+        DPRINTF("read_rap_bin->Content ID %s not found\n", content_id);
     #endif
     return 0;
 }
@@ -295,12 +294,6 @@ void make_rif(const char *path)
 			DPRINTF("open_path_hook: %s (looking for rap)\n", path);
 		#endif
 
-		/*
-		// Skip the creation of rif license if it already exists - By aldostool
-		if(skip_existing_rif && cellFsStat(path, &stat) == CELL_FS_SUCCEEDED)
-			return;
-		*/
-
 		char *content_id = ALLOC_CONTENT_ID;
 		memset(content_id, 0, 0x25);
 		strncpy(content_id, strrchr(path, '/') + 1, CONTENTID_SIZE);
@@ -309,17 +302,6 @@ void make_rif(const char *path)
 
 		uint8_t is_pslauncher = !strncmp(content_id, "2P0001-PS2U10000_00-0000111122223333", CONTENTID_SIZE) ||	// is_ps2_classic
 								!strncmp(content_id, "UP0001-PSPC66820_00-0000111122223333", CONTENTID_SIZE);	// is_psp_launcher
-
-		// 8 digit user id
-		char userid[9];
-		memcpy(userid, path + 15, 8);
-		userid[8] = '\0';
-		/*#ifdef DEBUG
-			DPRINTF("userid: [%s]\n", userid);
-		#endif*/
-		
-		char rap_bin_dir_home[120];
-		sprintf(rap_bin_dir_home, "/dev_hdd0/home/%s/exdata/rap.bin", userid);
 		
 		// ContentID and RAP cached values
 		static char cached_content_id[CONTENTID_SIZE] = {0};
@@ -335,16 +317,15 @@ void make_rif(const char *path)
 			{
 				//memcpy(rap, cached_rap, KEY_SIZE); // "rap" already has the value from cached_rap
 				found_rap_in_bin = 1;
-				#ifdef DEBUG
-					DPRINTF("PAYLOAD->make_rif-> Using cached RAP value for content_id: %s\n", content_id);
-				#endif
+				/* #ifdef DEBUG
+					DPRINTF("Using cached RAP value for content_id: %s\n", content_id);
+				#endif */
 			}
 			else
 			{
 				// Try to read RAP from rap.bin
 				found_rap_in_bin = read_rap_bin("/dev_hdd0/game/PS3XPLOIT/USRDIR/rap.bin", content_id, rap);// PS3HEN default path
 
-				if(!found_rap_in_bin) found_rap_in_bin = read_rap_bin(rap_bin_dir_home, content_id, rap);// COBRA default path
 				if(!found_rap_in_bin) found_rap_in_bin = read_rap_bin("/dev_hdd0/exdata/rap.bin", content_id, rap);
 				if(!found_rap_in_bin) found_rap_in_bin = read_rap_bin("/dev_usb000/exdata/rap.bin", content_id, rap);
 				if(!found_rap_in_bin) found_rap_in_bin = read_rap_bin("/dev_usb001/exdata/rap.bin", content_id, rap);
@@ -365,7 +346,7 @@ void make_rif(const char *path)
 							offset += sprintf(ptr + offset, "%02X ", rap[i]);
 						}
 
-						DPRINTF("PAYLOAD->make_rif->rap_value: %s\n", buf);
+						DPRINTF("rap_value: %s\n", buf);
 					#endif
 					*/
 				}
@@ -400,18 +381,18 @@ void make_rif(const char *path)
 
 			if (found_rap_in_bin) {
 				// rap already has the value copied from cached_rap
-				#ifdef DEBUG
-					DPRINTF("PAYLOAD->make_rif->found_rap_in_bin\n");
-				#endif
+				/* #ifdef DEBUG
+					DPRINTF("found_rap_in_bin\n");
+				#endif */
 			} else if (is_pslauncher) {
-				#ifdef DEBUG
-					DPRINTF("PAYLOAD->make_rif->ps2_psp\n");
-				#endif
+				/* #ifdef DEBUG
+					DPRINTF("is_pslauncher\n");
+				#endif */
 				// Use the hardcoded values for PS2 and PSP launchers
 				memcpy(rap, (uint8_t[]){ 0xF5, 0xDE, 0xCA, 0xBB, 0x09, 0x88, 0x4F, 0xF4, 0x02, 0xD4, 0x12, 0x3C, 0x25, 0x01, 0x71, 0xD9 }, KEY_SIZE);
 			} else {
 				#ifdef DEBUG
-					DPRINTF("PAYLOAD->make_rif->rap_path: %s output: %s\n", rap_path, path);
+					DPRINTF("rap_path: %s output: %s\n", rap_path, path);
 				#endif
 				cellFsRead(fd, rap, KEY_SIZE, &nread); // cached_rap
 				cellFsClose(fd);
@@ -438,27 +419,26 @@ void make_rif(const char *path)
 
 					if(cellFsStat(buffer, &stat) == CELL_FS_SUCCEEDED)
 					{
-						#ifdef DEBUG
+						/* #ifdef DEBUG
 							DPRINTF("Exit make_rif(): Found act.dat in %08d\n", i);
-						#endif
+						#endif */
 						return; // exit make_rif() -> the act.dat from another user account will be used
 					}
 				}
 
 				//create a fake act.dat for the current user
-				char userid[8];
-				strncpy(userid, path + 15, 8);
+				char userid[9];
+				memcpy(userid, path + 15, 8);
 				userid[8] = '\0';
-
 				sprintf(buffer, ACCOUNTID_VALUE, userid);
 
 				if(xreg_data(buffer))
 					create_act_dat(userid);
 			}
 
-			#ifdef DEBUG
+			/* #ifdef DEBUG
 				DPRINTF("act_path: %s content_id: %s\n", act_path, content_id);
-			#endif
+			#endif */
 
 			if(cellFsOpen(act_path, CELL_FS_O_RDONLY, &fd, 0666, NULL, 0) == CELL_FS_SUCCEEDED)
 			{
@@ -471,9 +451,17 @@ void make_rif(const char *path)
 					char *rif_path = ALLOC_PATH_BUFFER;
 					sprintf(rif_path, "/%s", path);
 
+					// Skip the creation of rif license if it already exists - By aldostools
+					if(skip_existing_rif && cellFsStat(rif_path, &stat) == SUCCEEDED)
+					{
+						/* #ifdef DEBUG
+							DPRINTF("license already exists, omitting...);
+						#endif */
+						return;
+					}
+
 					uint8_t rap_key[KEY_SIZE];
 					memcpy(rap_key, rap, KEY_SIZE);
-
 					read_act_dat_and_make_rif(rap_key, act_dat, content_id, rif_path);
 				}
 			}
