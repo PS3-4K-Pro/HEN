@@ -852,8 +852,8 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 		
 		lock_mtx(&oph_mtx);
 		make_rif(path0);
-		//restore_syscalls(path0);
-		//check_signin(path0);
+		restore_syscalls(path0);
+		check_signin(path0);
 
 		if (block_psp_launcher && !umd_file && !strncmp(path0, "/dev_flash/pspemu", 17))
 		{
