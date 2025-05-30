@@ -148,6 +148,7 @@ SprxPatch explore_plugin_patches[] =
 	{ app_home_offset+8, 0x642f5053, &condition_apphome },
 	//{ ps2_nonbw_offset, LI(0, 1), &condition_ps2softemu },
 /*	//// Devil303's What's New ///
+
 	{whatsnew_offset, 0x68747470, &condition_true	},
 	{whatsnew_offset+4, 0x3A2F2F77, &condition_true	},
 	{whatsnew_offset+8, 0x77772E78, &condition_true	},
@@ -192,6 +193,7 @@ SprxPatch game_ext_plugin_patches[] =
 	//{ ps2_nonbw_offset3, LI(R0, 1), &condition_ps2softemu },
 	{ ps_region_error_offset, NOP, &condition_true }, // Needed sometimes...
 	{ remote_play_offset, 0x419e0028, &condition_true },
+	{ gameboot_offset, LI(R3, 2), &condition_true },
 	//{ ps_video_error_offset, LI(R3, 0), &condition_game_ext_psx },
 	//{ ps_video_error_offset+4, BLR, &condition_game_ext_psx }, // experimental, disabled due to its issue with remote play
 	{ 0 }
@@ -631,6 +633,26 @@ void do_hook_all_syscalls(void)
 	set_syscall_handler(syscall_handler);
 }
 
+struct SceHeader_s
+{
+    uint32_t magic;
+    uint32_t version;
+    uint16_t attribute;
+    uint16_t category;
+    uint32_t ext_header_size;
+    uint64_t file_offset;
+    uint64_t file_size;
+};
+
+struct SceProgramIdentHeader_s
+{
+    uint64_t program_authority_id;
+    uint32_t program_vender_id;
+    uint32_t program_type;
+    uint64_t program_sceversion;
+    uint64_t padding;
+};
+
 LV2_HOOKED_FUNCTION_PRECALL_2(int, post_lv1_call_99_wrapper, (uint64_t *spu_obj, uint64_t *spu_args))
 {
 	sleep_done=1;
@@ -654,36 +676,58 @@ LV2_HOOKED_FUNCTION_PRECALL_2(int, post_lv1_call_99_wrapper, (uint64_t *spu_obj,
 
 	if(is_ptr==0x80) //new
 	{
-		if((*(uint64_t *)(saved_sce_hdr+0x48)>=0x200) || (*(uint64_t *)(saved_sce_hdr+0x48)==0x130))
+		uint64_t type = *(uint64_t *)(saved_sce_hdr + 0x48);
+		if ((type >= 0x200) || (type == 0x130))
 		{
-			sleep_done=0;
+			sleep_done = 0;
 			event_queue_drain(result_queue);
-			event_port_send(command_port, CMD_DISABLE_PATCHES, (uint64_t)&res,0);
+			event_port_send(command_port, CMD_DISABLE_PATCHES, (uint64_t)&res, 0);
 			event_queue_receive(result_queue, &event, 0);
 			event_queue_drain(result_queue);
+
 			#ifdef DEBUG
 				DPRINTF("SELF loading!\n");
 			#endif
+
 			suspend_intr();
 			uint64_t state = spin_lock_irqsave();
+
+			// --- NPDRM Check --- Thanks @aomsin2526 for his finding on qCFW
+			uint64_t self_header_addr = (uint64_t)saved_sce_hdr;
+			struct SceHeader_s *sceHeader = (struct SceHeader_s *)self_header_addr;
+
+			uint8_t isNpdrm = 0, isCustomVshModules = 0;
+
+			if (sceHeader->magic == 0x53434500 && sceHeader->category == 1)
+			{
+				struct SceProgramIdentHeader_s *sceProgramIdentHeader = (struct SceProgramIdentHeader_s *)(self_header_addr + 0x70);
+				isNpdrm = (sceProgramIdentHeader->program_type == 8);
+				isCustomVshModules = ((sceProgramIdentHeader->program_authority_id == 0x1070000052000001) &&
+									  (sceHeader->attribute < 0x1C));
+			}
+
+			// Set hardcoded tick values, 1.2 sec for NPDRM, and 0.63 for everything else.
+			uint64_t delay_ticks = (isNpdrm || isCustomVshModules) ? 0x5B52E80 : 0x3000000;
+
 			#ifdef DEBUG
-				//DPRINTF("interrupt suspended!\n");
+				const char *elf_type_str = (isNpdrm || isCustomVshModules) ? "NPDRM or custom VSH" : "Standard ELF";
+				uint64_t delay_ms = delay_ticks / 79800; // convert ticks to ms
+				//DPRINTF("%s detected, sleeping for %llu ticks (~%llu ms)\n",
+					elf_type_str,
+					(unsigned long long)delay_ticks,
+					(unsigned long long)delay_ms);
 			#endif
-			current_ticks=get_ticks();
-			target_ticks=current_ticks+0x3000000; // Testing
-			while(get_ticks()<target_ticks)
-			{}
-			//func_sleep.addr=(void*)MKA(get_syscall_address(141));
-			//func_sleep.toc=(void*)MKA(TOC);
-			//uint64_t (*sleep_thread_user)(uint64_t usecs)=(void*)&func_sleep;
-			//sleep_thread_user(500000);
-			sleep_done=1;
-			#ifdef DEBUG
-				//DPRINTF("sleep finished!\n");
-			#endif
+
+
+			current_ticks = get_ticks();
+			target_ticks = current_ticks + delay_ticks;
+			while (get_ticks() < target_ticks) {}
+
+			sleep_done = 1;
 			spin_unlock_irqrestore(state);
 			resume_intr();
-			event_port_send(command_port, CMD_ENABLE_PATCHES, (uint64_t)&res,0);
+
+			event_port_send(command_port, CMD_ENABLE_PATCHES, (uint64_t)&res, 0);
 			event_queue_receive(result_queue, &event, 0);
 			event_queue_drain(result_queue);
 		}

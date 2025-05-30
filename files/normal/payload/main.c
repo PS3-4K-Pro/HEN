@@ -1464,11 +1464,14 @@ int main(void)
 			}
 			
 			// Enables Gameboot sound. (Extra: Region Block, PS3 HDD whitelisted games crash, LIC.EDAT license check bypassed)
+			/* Gameboot now is patched via payload for stability 
+			
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",&stat)==0))
 			{
 				map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
-			
+			*/
+
 			// Enables Music player visualization mods. (Note: May cause black screen on exit while in memory hungry games)
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",&stat)==0))
 			{

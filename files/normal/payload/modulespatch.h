@@ -75,7 +75,7 @@
 //#define ps2_nonbw_offset      		0xDDDC4	// HAN support files has DEX version of this module
 #define app_home_offset					0x250910 // Retail
 #define ps2_nonbw_offset				0xDD9B4 // Retail
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68324
@@ -94,6 +94,7 @@
 #define ps2_nonbw_offset3				0x17000
 #define ps_region_error_offset			0x68C0
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
@@ -224,7 +225,7 @@
 //#define ps2_nonbw_offset      		0xDDDC4	// HAN support files has DEX version of this module
 #define app_home_offset					0x250910 // Retail
 #define ps2_nonbw_offset				0xDD9B4 // Retail
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68324
@@ -243,6 +244,7 @@
 #define ps2_nonbw_offset3				0x17000
 #define ps_region_error_offset			0x68C0
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
@@ -373,7 +375,7 @@
 //#define ps2_nonbw_offset      		0xDDDC4	// HAN support files has DEX version of this module
 #define app_home_offset					0x250910 // Retail
 #define ps2_nonbw_offset				0xDD9B4 // Retail
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68324
@@ -392,6 +394,7 @@
 #define ps2_nonbw_offset3				0x17000
 #define ps_region_error_offset			0x68C0
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
@@ -522,7 +525,7 @@
 //#define ps2_nonbw_offset      		0xDDDC4	// HAN support files has DEX version of this module
 #define app_home_offset					0x250910 // Retail
 #define ps2_nonbw_offset				0xDD9B4 // Retail
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68324
@@ -541,6 +544,7 @@
 #define ps2_nonbw_offset3				0x17000
 #define ps_region_error_offset			0x68C0
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
@@ -673,7 +677,7 @@
 /*4.90+
 #define app_home_offset      			0x250720
 #define ps2_nonbw_offset      			0xDD9BC */
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68324
@@ -692,6 +696,7 @@
 #define ps2_nonbw_offset3				0x17000
 #define ps_region_error_offset			0x68C0
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
@@ -819,7 +824,7 @@
 /* explore_plugin */
 #define app_home_offset      			0x2514C0
 #define ps2_nonbw_offset      			0xDDDC4
-#define whatsnew_offset					0x26E9B0
+#define whatsnew_offset					0x26DDA0 // 0x26E9B0 official
 
 /* explore_category_game */
 #define ps2_nonbw_offset2				0x68264
@@ -838,6 +843,7 @@
 #define ps2_nonbw_offset3				0x172F0
 #define ps_region_error_offset			0x687C
 #define remote_play_offset				0x5fc0
+#define gameboot_offset 				0x5718 //CEX value, need DEX
 
 /* premo_plugin */
 #define pcremote_play_offset1			0xb6fc
