@@ -172,6 +172,18 @@ static int disc_being_mounted = 0;
 static int could_not_read_disc;
 static int hdd0_mounted = 0;
 
+// 3k3y/Redump ISOs decryption on-the-fly (By Evilnat)
+uint8_t key_d1[0x10] = { 0x38, 0x0B, 0xCF, 0x0B, 0x53, 0x45, 0x5B, 0x3C, 0x78, 0x17, 0xAB, 0x4F, 0xA3, 0xBA, 0x90, 0xED };
+uint8_t iv_d1[0x10] =  { 0x69, 0x47, 0x47, 0x72, 0xAF, 0x6F, 0xDA, 0xB3, 0x42, 0x74, 0x3A, 0xEF, 0xAA, 0x18, 0x62, 0x87 };
+uint8_t disc_key[0x10] = { 0 };
+char key_path[256];
+char dkey_path[256];
+int encrypted_iso = 0;
+int keyfd;
+static uint32_t sectors;
+static unsigned char iv_[0x10];
+DiscRegionInfo discRegionInfo[200];
+
 static int ps2emu_type;
 
 static int video_mode = -2;
@@ -188,6 +200,140 @@ static uint32_t cd_sector_size = 2352;
 //
 
 LV2_EXPORT int storage_internal_get_device_object(void *object, device_handle_t handle, void **dev_object);
+
+// Convert 4 bytes in big-endian format, to an unsigned integer (By red_meryl)
+static unsigned int char_arr_BE_to_uint(unsigned char *arr)
+{
+	return arr[3] + 256 * (arr[2] + 256 * (arr[1] + (256 * arr[0])));
+}
+
+// Get key for ISO decryption on-the-fly (By Evilnat)
+static int get_key(char *path) 
+{
+	char partial_path[256];
+	uint64_t keynread;
+
+	char *ps3iso_folder = strstr(path, "PS3ISO");
+	if(ps3iso_folder == NULL)
+		ps3iso_folder = strstr(path, "ps3iso");
+	if(ps3iso_folder == NULL)
+		return 1;		
+
+	char *ext = strstr(path, ".ISO");	
+	if(ext == NULL)
+		ext = strstr(path, ".iso");
+	if(ext == NULL)
+		ext = strstr(path, ".ntfs["); // By aldostools
+
+	if(ext)
+	{
+		strcpy(partial_path, path);
+		int path_len = strlen(partial_path);
+		int ext_len = strlen(ext);	
+		partial_path[path_len - ext_len] = '\0';
+		sprintf(key_path, "%s.key", partial_path);		
+		sprintf(dkey_path, "%s.dkey", partial_path);	
+	}	
+
+	memset(ntfs_iso_path, 0, sizeof(ntfs_iso_path));
+
+	if(!cellFsOpen(dkey_path, CELL_FS_O_RDONLY, &keyfd, 0666, NULL, 0))
+	{
+		//DPRINTF("[ISO] Found DKEY\n");
+		char dkey[0x20];
+		cellFsRead(keyfd, dkey, 0x20, &keynread);
+
+		for (int i = 0; i < 0x10; i++)
+		{
+			char byte[3];
+			strncpy(byte, &dkey[i * 2], 2);
+			byte[2] = 0;
+			disc_key[i] = strtoull(byte, NULL, 16);
+		}
+
+		return 0;
+	}
+	else if(!cellFsOpen(key_path, CELL_FS_O_RDONLY, &keyfd, 0666, NULL, 0))
+	{			
+		//DPRINTF("[ISO] Found DISCKEY\n");
+		cellFsRead(keyfd, disc_key, 0x10, &keynread);		
+		cellFsClose(keyfd);
+		return 0;
+	}
+	else
+		memset(disc_key, 0, 0x10);
+
+	return 1;
+}
+
+// From https://www.psdevwiki.com/
+static void getIV(unsigned char* iv, int sectorNumber)
+{
+	int num = sectorNumber;
+
+	for (int j = 0; j < 16; j++)
+	{
+		iv[16 - j - 1] = (int)(num & 0xFF);
+		num >>= 8;
+	}
+}
+
+// Get sectors and region adresses (By Evilnat)
+static int prepare_region_info(DiscRegionInfo *info, uint8_t *buffer)
+{
+	memcpy(&sectors, &buffer[0], 4);
+
+	if(sectors)
+	{
+		sectors = (char_arr_BE_to_uint((unsigned char*)&sectors) * 2) - 1;
+
+		for(int i = 0; i < sectors; i++)
+		{
+			info[i].isEncrypted = (i % 2 == 1);
+			info[i].region_first_sector = (i == 0 ? 0 : info[i - 1].region_last_sector + 1);
+			info[i].region_last_sector = char_arr_BE_to_uint(buffer + 0x0C + (i * 4));
+		}
+
+		return 0;
+	}
+
+	return 1;
+}
+
+// 3k3y/Redump ISOs decryption on-the-fly (By Evilnat)
+static void decrypt_iso_data(DiscRegionInfo *info, uint32_t total_sectors, uint64_t offset, uint8_t *buffer, uint64_t size)
+{
+	int lba = 0;
+
+	for(int i = 0; i < total_sectors; i++)
+	{
+		if(info[i].isEncrypted)						
+		{				
+			lba = 0;
+
+			if((offset >= info[i].region_first_sector * 0x800) && (offset < info[i].region_last_sector * 0x800))
+			{			
+				if(size > 0x800)
+				{
+					for(int sector_pos = 0; sector_pos < size / 0x800; sector_pos++)
+					{
+						lba = (offset + sector_pos * 0x800 - (info[i].region_first_sector * 0x800)) / 0x800;
+						getIV(iv_, info[i].region_first_sector + lba);
+						//DPRINTF("[ISO] Decrypting offset: 0x%lX || Global sector: 0x%lX || lba: 0x%X\n", offset + sector_pos * 0x800, info[i].region_first_sector, lba);
+						aescbccfb_dec(buffer + sector_pos * 0x800, buffer + sector_pos * 0x800, 0x800, disc_key, 128, iv_);
+					}
+				}
+				else
+				{
+					lba = (offset - (info[i].region_first_sector * 0x800)) / 0x800;	
+					getIV(iv_, info[i].region_first_sector + lba);
+					//DPRINTF("[ISO] Decrypting offset: 0x%lX || Global sector: 0x%lX || lba: 0x%X\n", offset, info[i].region_first_sector, lba);
+					aescbccfb_dec(buffer, buffer, 0x800, disc_key, 128, iv_);
+				}
+			}
+		}
+	}
+}
 
 static INLINE void get_next_read(int64_t discoffset, uint64_t bufsize, uint64_t *fileoffset, uint64_t *readsize, int *file)
 {
@@ -307,6 +453,49 @@ static INLINE int process_read_iso_cmd(ReadIsoCmd *cmd)
 					break;
 				}
 
+				// 3k3y/Redump ISOs decryption on-the-fly (By Evilnat)
+				if(filepos == 0)
+				{
+					CellFsStat stat;
+					if(cellFsStat(discfile->files[file], &stat) == CELL_FS_SUCCEEDED)
+					{
+						unsigned char buffer[0x1000];
+						cellFsRead(discfd, buffer, 0x1000, &v);
+
+						if(memcmp(&buffer[REDUMP_WATERMARK_OFFSET], "Decrypted", 9))
+						{
+							if(!memcmp(&buffer[REDUMP_WATERMARK_OFFSET], "Encrypted", 9) || disc_key[0] != 0x00)
+							{
+								//DPRINTF("[ISO] Encrypted ISO detected\n");	 
+
+								if(disc_key[0] == 0x00)
+								{
+									memcpy(disc_key, &buffer[REDUMP_KEY_OFFSET], 0x10);
+									if(disc_key[0] == 0x00)
+									{
+										//DPRINTF("[ISO] Key not found!\n");	
+									}
+									else 
+									{
+										aescbccfb_enc(disc_key, disc_key, 0x10, key_d1, 128, iv_d1);
+										//DPRINTF("[ISO] Created DISCKEY\n");	
+									}
+								}		
+
+								if(!prepare_region_info(discRegionInfo, buffer))
+									encrypted_iso = 1;
+								else
+									encrypted_iso = 0;
+							}
+							else 
+								encrypted_iso = 0;
+						}
+						else 
+							encrypted_iso = 0;
+					}
+					else 
+						encrypted_iso = 0;
+				}
 				activefile = file;
 				doseek = 1;
 			}
@@ -323,6 +512,10 @@ static INLINE int process_read_iso_cmd(ReadIsoCmd *cmd)
 			ret = cellFsRead(discfd, readbuf, readsize, &v);
 			if (ret != SUCCEEDED)
 				break;
+			
+			// 3k3y/Redump ISOs decryption on-the-fly (By Evilnat)
+			if(encrypted_iso && disc_key[0] != 0x00 && filepos != 0)
+				decrypt_iso_data(discRegionInfo, sectors, filepos, (uint8_t *)readbuf, cmd->size);
 
 			if (v != readsize)
 			{
@@ -823,6 +1016,18 @@ int process_proxy_cmd(uint64_t command, process_t process, uint8_t *buf, uint64_
 				copy_to_process(process, kbuf, buf, this_read_size);
 			}
 
+			// 3k3y/Redump ISOs decryption on-the-fly (By Evilnat)
+			if(offset == 0)
+			{
+				if(!get_key(ntfs_iso_path))
+					prepare_region_info(discRegionInfo, buf);
+				else
+					memset(disc_key, 0, 0x10);
+			}
+
+			if(offset != 0 && disc_key[0] != 0x00)
+				decrypt_iso_data(discRegionInfo, sectors, offset, (uint8_t *)buf, size);
+
 			buf += this_read_size;
 			offset += this_read_size;
 			remaining -= this_read_size;
@@ -1027,11 +1232,11 @@ uint32_t find_file_sector(uint8_t *buf, char *file)
 
 int bnet_ioctl(int socket,uint32_t flags, void* buffer);
 	
-#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
+/* #if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 	int sys_fs_open(const char *path, int flags, int *fd, uint64_t mode, const void *arg, uint64_t size);
 	int sys_fs_read(int fd, void *buf, uint64_t nbytes, uint64_t *nread);
 	int sys_fs_close(int fd);
-#endif
+#endif */
 
 void debug_install(void);
 void debug_uninstall(void);
@@ -1077,11 +1282,11 @@ int enable_patches()
 		map_path_patches(0);
 		storage_ext_patches();
 		
-		#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
+		/* #if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 			hook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
 			hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
 			hook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
-		#endif
+		#endif */
 		
 		hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
 		
@@ -1136,11 +1341,11 @@ int disable_patches()
 	unhook_all_region();
 	unhook_all_map_path();
 	
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
+	/* #if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
 		unhook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
 		unhook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
 		unhook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
-	#endif
+	#endif */
 	
 	unhook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
 	//remove_pokes();
@@ -3979,7 +4184,7 @@ cd_sector_size = (trackscount & 0xffff00)>>4; //  <- Use: trackscount = num_of_t
 void storage_ext_init(void)
 {
 	thread_t dispatch_thread;
-	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", "/dev_update", 0, 0, 0, 0, 0);
+	cellFsUtilMount("CELL_FS_IOS:BUILTIN_FLSH1", "CELL_FS_FAT", "/dev_rewrite", 0, 0, 0, 0, 0);
 	get_vsh_proc();
 	ps2emu_type = get_ps2emu_type();
 	mutex_create(&mutex, SYNC_PRIORITY, SYNC_NOT_RECURSIVE);
