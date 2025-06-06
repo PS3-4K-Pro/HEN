@@ -32,7 +32,7 @@
 #include "sm_ext.h"
 //#include "laboratory.h"
 #include "ps3mapi_core.h"
-#include "qa.h"
+//#include "qa.h"
 #include "homebrew_blocker.h"
 #include "make_rif.h"
 
@@ -61,7 +61,7 @@
 
 #define COBRA_VERSION		0x0F
 #define COBRA_VERSION_BCD	0x0850
-#define HEN_REV				0x0350
+#define HEN_REV				0x0351
 
 #if defined(FIRMWARE_4_80)
 	#define FIRMWARE_VERSION	0x0480
@@ -199,35 +199,6 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,bnet_ioctl,(int socket,uint32_t flags, v
 	else
 		return DO_POSTCALL;
 }
-
-#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_6(int,sys_fs_open,(const char *path, int flags, int *fd, uint64_t mode, const void *arg, uint64_t size))
-	{
-	/*	if(!strstr(get_process_name(get_current_process_critical()),"vsh"))
-		{
-			rif_fd=0;
-			act_fd=0;
-			misc_fd=0;
-			return 0;
-		}*/
-		int path_len=strlen(path);
-		if(strstr(path,".rif"))
-		{
-			//DPRINTF("RIF fd open called:%s\n",path);
-			rif_fd=*fd;
-		}
-		else if(strstr(path,"act.dat"))
-		{
-			//DPRINTF("act.dat fd open called:%s\n",path);
-			act_fd=*fd;
-		}
-		else if((strstr(path,".edat")) || (strstr(path,".EDAT")) || (strstr(path,"ISO.BIN.ENC")) || (strstr(path+path_len-7,"CONFIG")))
-		{
-			misc_fd=*fd;
-		}
-		return 0;
-	}
-#endif
 
 int sha1(uint8_t *buf, uint64_t size, uint8_t *out)
 {
@@ -376,91 +347,6 @@ LV2_HOOKED_FUNCTION_COND_POSTCALL_3(int,read_eeprom_by_offset,(uint32_t offset, 
 	return DO_POSTCALL;
 }
 
-#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_4(int,sys_fs_read,(int fd, void *buf, uint64_t nbytes, uint64_t *nread))
-	{
-		if(rif_fd==fd)
-		{
-			//DPRINTF("RIF fd read called:%x %p %016lx %p\n",fd,buf,nbytes,nread);
-			if(*nread==0x98)
-			{
-				//DPRINTF("generating rif ECDSA\n");
-				uint8_t *buf1;
-				page_allocate_auto(NULL, 0x98, 0x2F, (void*)&buf1);
-				memcpy(buf1,buf,0x98);
-				uint8_t sha1_digest[20];
-				sha1(buf1, 0x70,sha1_digest);
-				uint8_t R[0x15];
-				uint8_t S[0x15];
-				ecdsa_sign(sha1_digest, R, S);
-				memcpy(buf1+0x70, R+1, 0x14);
-				memcpy(buf1+0x70+0x14, S+1, 0x14);
-				memcpy(buf+0x70,buf1+0x70,0x28);
-				page_free(NULL, buf1, 0x2F);
-				//DPRINTF("R:%015x\nS:%015x\n",R,S);
-			}
-		}
-		else if(act_fd==fd)
-		{
-			//DPRINTF("act fd read called:%x %p %016lx %p\n\n",fd,buf,nbytes,nread);
-			if(*nread==0x1038)
-			{
-				//DPRINTF("generating act ECDSA\n");
-				uint8_t *buf1;
-				page_allocate_auto(NULL, 0x1038, 0x2F, (void*)&buf1);
-				memcpy(buf1,buf,0x1038);
-				uint8_t sha1_digest[20];
-				sha1(buf1, 0x1010,sha1_digest);
-				uint8_t R[0x15];
-				uint8_t S[0x15];
-				ecdsa_sign(sha1_digest, R, S);
-				memcpy(buf1+0x1010, R+1, 0x14);
-				memcpy(buf1+0x1010+0x14, S+1, 0x14);
-				memcpy(buf+0x1010,buf1+0x1010,0x28);
-				page_free(NULL, buf1, 0x2F);
-				//DPRINTF("R:%015x\nS:%015x\n",R,S);
-			}
-		}
-		else if(misc_fd==fd)
-		{
-			if(*nread==0x100)
-			{
-				//DPRINTF("generating misc ECDSA\n");
-				uint8_t *buf1;
-				page_allocate_auto(NULL, 0x100, 0x2F, (void*)&buf1);
-				memcpy(buf1,buf,0x100);
-				uint8_t sha1_digest[20];
-				sha1(buf1, 0xd8,sha1_digest);
-				uint8_t R[0x15];
-				uint8_t S[0x15];
-				ecdsa_sign(sha1_digest, R, S);
-				memcpy(buf1+0xd8, R+1, 0x14);
-				memcpy(buf1+0xd8+0x14, S+1, 0x14);
-				memcpy(buf+0xd8,buf1+0xd8,0x28);
-				page_free(NULL, buf1, 0x2F);
-			}
-		}
-		return 0;
-	}
-
-	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_1(int,sys_fs_close,(int fd))
-	{
-		if(rif_fd==fd)
-		{
-			rif_fd=0;
-		}
-		else if(act_fd==fd)
-		{
-			act_fd=0;
-		}
-		else if(misc_fd==fd)
-		{
-			misc_fd=0;
-		}
-		return 0;
-	}
-#endif
-
 int unload_plugin_kernel(uint64_t residence)
 {
 	dealloc((void*)residence,0x27);
@@ -492,7 +378,7 @@ void _sys_cfw_poke(uint64_t *addr, uint64_t value);
 LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 {
 	#ifdef DEBUG
-		DPRINTF("New poke called\n");
+		//DPRINTF("New poke called\n");
 	#endif
 
 	_sys_cfw_poke(addr, value);
@@ -502,7 +388,7 @@ LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 // LV1
 /*#define HV_BASE						0x8000000014000000ULL	// where in lv2 to map lv1
 #define HV_PAGE_SIZE				0x0c					// 4k = 0x1000 (1 << 0x0c)
-#include <lv1/mm.h>
+//#include <lv1/mm.h>
 LV2_SYSCALL2(uint64_t, sys_cfw_peek_lv1, (uint64_t _addr))
 {
 	uint64_t ret;
@@ -541,7 +427,7 @@ LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
 LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len))
 {
 	#ifdef DEBUG
-		DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
+		//DPRINTF("sys_cfw_memcpy: %p %p 0x%lx\n", dst, src, len);
 	#endif
 
 	if (len == 8)
@@ -577,7 +463,7 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 			if (((value == sc_null) ||(value == syscall_not_impl)) && (syscall_num != 8)) //Allow removing protected syscall 6 7 9 10 35 NOT 8
 			{
 				#ifdef DEBUG
-					DPRINTF("HB remove syscall %ld\n", syscall_num);
+					//DPRINTF("HB remove syscall %ld\n", syscall_num);
 				#endif
 				*ptr=value;
 				return;
@@ -585,7 +471,7 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 			else //Prevent syscall 6 7 9 10 and 35 from being re-written
 			{
 				#ifdef DEBUG
-					DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
+					//DPRINTF("HB has been blocked from rewritting syscall %ld\n", syscall_num);
 				#endif
 				return;
 			}
@@ -628,23 +514,25 @@ LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 	*ptr=value;*/
 }
 
-LV2_SYSCALL2(void, sys_cfw_lv1_poke, (uint64_t lv1_addr, uint64_t lv1_value))
+/*LV2_SYSCALL2(uint64_t, sys_cfw_lv1_peek, (uint64_t lv1_addr))
+{
+	#ifdef DEBUG
+		DPRINTF("lv1_peek %p\n", (void*)lv1_addr);
+	#endif
+	
+    uint64_t ret;
+    ret = lv1_peekd(lv1_addr);
+    return ret;
+}*/
+
+/*LV2_SYSCALL2(void, sys_cfw_lv1_poke, (uint64_t lv1_addr, uint64_t lv1_value))
 {
 	#ifdef DEBUG
 		DPRINTF("LV1 poke %p %016lx\n", (void*)lv1_addr, lv1_value);
 	#endif
 	lv1_poked(lv1_addr, lv1_value);
-}
+}*/
 
-// Check if this work, i added in the restore syscalls options
-LV2_SYSCALL2(uint64_t, sys_cfw_lv1_peek, (uint64_t lv1_addr))
-{
-	DPRINTF("lv1_peek %p\n", (void*)lv1_addr);
-	
-    uint64_t ret;
-    ret = lv1_peekd(lv1_addr);
-    return ret;
-}
 LV2_SYSCALL2(void, sys_cfw_lv1_call, (uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5, uint64_t a6, uint64_t a7, uint64_t num))
 {
 	/* DO NOT modify */
@@ -1236,11 +1124,7 @@ void create_syscalls(void)
 
 static INLINE void apply_kernel_patches(void)
 {
-    /// Adding HEN patches on init for stability /// -- START
-	#if defined (FIRMWARE_4_82DEX) ||  defined (FIRMWARE_4_84DEX)
-		do_patch(MKA(vsh_patch),0x386000014E800020);
-	#endif
-	
+
 	//do_patch32(MKA(patch_data1_offset), 0x01000000);
 	do_patch32(MKA(module_sdk_version_patch_offset), NOP);
 	do_patch32(MKA(patch_func8_offset1),0x38600000);
@@ -1258,18 +1142,6 @@ static INLINE void apply_kernel_patches(void)
 	do_patch(MKA(fix_8001003E),0x3FE080013BE00000);
 	do_patch(MKA(PATCH_JUMP),0x2F84000448000098);
 	*(uint64_t *)MKA(ECDSA_FLAG)=0;
-	
-	/// Adding HEN patches on init for stability ///	 -- END
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-		hook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
-	#endif
-	
-	hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
-	
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-		hook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
-		hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
-	#endif
 	
 	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90) || defined (FIRMWARE_4_91) || defined (FIRMWARE_4_92)
 		hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
@@ -1301,7 +1173,6 @@ void enable_ingame_screenshot()
 // Cleanup Old and Temp HEN Files
 void cleanup_files(void)
 {
-	// Old 2.x.x xml paths to avoid conflict for remap fix
 	cellFsUnlink("/dev_hdd0/hen/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/ps3hen_updater.xml");
@@ -1354,11 +1225,6 @@ int main(void)
 	#endif
 
 	//poke_count=0;
-	#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-		ecdsa_set_curve();
-		ecdsa_set_pub();
-		ecdsa_set_priv();
-	#endif
 		
 	// Cleanup Old and Temp HEN Files
 	cleanup_files();
@@ -1383,16 +1249,7 @@ int main(void)
 		#endif
 	}
 	
-	*/ 
-
-	/* File and folder redirections using mappath mappings
-	if(mappath_disabled==0)
-	{
-		//map_path("/dev_hdd0/hen/xml","/dev_flash/hen/remap/xml",FLAG_MAX_PRIORITY|FLAG_PROTECT); // Remap path to XML
-		//map_path("/dev_hdd0/hen/xml/hfw_settings.xml","/dev_flash/hen/remap/xml/hfw_settings.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT); // Enable HFW Tools on Launch 2.3.3+
-		//map_path("/dev_hdd0/hen/xml/hen_pkg_manager_full.xml","/dev_flash/hen/remap/xml/hen_pkg_manager_full.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT); // Show PKG Manager
-		//map_path("/dev_hdd0/hen/xml/hen_enable.xml","/dev_flash/hen/remap/xml/hen_enable.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT); // Hide Enable HEN Menu Item
-	} */
+	*/
 
 	CellFsStat stat;
 		// Checks if PS3™ 4K Pro Mod is installed, if so, do the remaps.

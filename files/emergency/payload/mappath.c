@@ -684,7 +684,7 @@ int map_path(char *oldpath, char *newpath, uint32_t flags)
 		if (strcmp(oldpath, "/dev_bdvd") == 0) {
 			condition_apphome = (newpath != NULL);
 			#ifdef DEBUG
-				DPRINTF("map_path: condition_apphome set to %s\n",condition_apphome ? "true":"false" );
+				//DPRINTF("map_path: condition_apphome set to %s\n",condition_apphome ? "true":"false" );
 			#endif
 		}
 		lock_mtx(&map_mtx);
@@ -858,8 +858,8 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 		
 		lock_mtx(&oph_mtx);
 		make_rif(path0);
-		//restore_syscalls(path0);
-		//check_signin(path0);
+		restore_syscalls(path0);
+		check_signin(path0);
 
 		if (block_psp_launcher && !umd_file && !strncmp(path0, "/dev_flash/pspemu", 17))
 		{
@@ -922,9 +922,9 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 						if (len < 8) ;
 						else if(!strcmp(photo + len -4, ".PNG") || !strcmp(photo + len -4, ".JPG") || !strcmp(photo + len -8, "_COV.JPG") || !strncasecmp(photo + len -8, ".iso.jpg", 8) || !strncasecmp(photo + len -8, ".iso.png", 8))
 						{
-							#ifdef DEBUG
+							/* #ifdef DEBUG
 								DPRINTF("open_path_hook:= CREATING /dev_hdd0/tmp/wm_request\n");
-							#endif
+							#endif */
 							int fd;
 							if(cellFsOpen("/dev_hdd0/tmp/wm_request", CELL_FS_O_CREAT | CELL_FS_O_WRONLY | CELL_FS_O_TRUNC, &fd, 0666, NULL, 0) == 0)
 							{
@@ -945,9 +945,9 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 					#endif
 				}
 				else{
-					/* #ifdef DEBUG
+					#ifdef DEBUG
 						DPRINTF("open_path_hook=: no mapping found for path [%s]\n", path);
-					#endif */
+					#endif
 				}
 				unlock_mtx(&map_mtx);
 			}
