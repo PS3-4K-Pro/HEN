@@ -8,7 +8,7 @@
 #include <lv2/memory.h>
 #include <lv2/patch.h>
 #include <lv2/syscall.h>
-#include <lv2/usb.h>
+//#include <lv2/usb.h>
 #include <lv2/storage.h>
 #include <lv2/thread.h>
 #include <lv2/synchronization.h>
@@ -19,6 +19,7 @@
 #include <lv2/error.h>
 #include <lv2/symbols.h>
 #include <lv2/pad.h>
+#include <lv1/mm.h>
 #include <lv1/stor.h>
 #include <lv1/patch.h>
 #include "common.h"
@@ -108,34 +109,6 @@ typedef struct
 	uint32_t address;
 	uint32_t data;
 } Patch;
-/*
-static Patch kernel_patches[] =
-{
-	{ patch_data1_offset, 0x01000000 },
-	{ patch_func8_offset1, LI(R3, 0) }, // force lv2open return 0
-
-	// disable calls in lv2open to lv1_send_event_locally which makes the system crash
-	{ patch_func8_offset2, NOP },
-	{ patch_func9_offset, NOP }, // 4.30 - watch: additional call after
-
-	// psjailbreak, PL3, etc destroy this function to copy their code there.
-	// We don't need that, but let's dummy the function just in case that patch is really necessary
-	{ mem_base2, LI(R3, 1) },
-	{ mem_base2 + 4, BLR },
-
-	// sys_sm_shutdown, for ps2 let's pass to copy_from_user a fourth parameter
-	{ shutdown_patch_offset, MR(R6, R31) },
-	{ module_sdk_version_patch_offset, NOP },
-
-	// User thread prio hack (needed for netiso)
-	{ user_thread_prio_patch, NOP },
-	{ user_thread_prio_patch2, NOP },
-
-	// ODE Protection removal (needed for CFW 4.60+)
-	{ lic_patch, LI(R3, 1) },
-	{ ode_patch, LI(R3, 0) },
-	{ ode_patch + 4, STD(R3, 0, R9) },
-};*/
 
 #define N_KERNEL_PATCHES	(sizeof(kernel_patches) / sizeof(Patch))
 
@@ -386,12 +359,12 @@ LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 }
 
 // LV1
-/*#define HV_BASE						0x8000000014000000ULL	// where in lv2 to map lv1
+#define HV_BASE						0x8000000014000000ULL	// where in lv2 to map lv1
 #define HV_PAGE_SIZE				0x0c					// 4k = 0x1000 (1 << 0x0c)
 //#include <lv1/mm.h>
 LV2_SYSCALL2(uint64_t, sys_cfw_peek_lv1, (uint64_t _addr))
 {
-	uint64_t ret;
+	uint64_t ret = 0;
 	uint64_t mmap_lpar_addr=0;
 	uint64_t _offset = (_addr & 0xFFFFFFFFFFFFF000ULL);
 	lv1_undocumented_function_114(_offset, HV_PAGE_SIZE, 0x1000, &mmap_lpar_addr);
@@ -422,7 +395,7 @@ LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
 	}
 
 	return;
-}*/
+}
 
 LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len))
 {
@@ -597,6 +570,13 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 	#ifdef DEBUG
 		DPRINTF("Syscall 8 -> %lx\n", function);
 	#endif
+	
+	/* #ifdef DEBUG
+		if(function >= 0x8000000000000000ULL)	
+		{
+			DPRINTF("LV1 peek %lx %llux\n", function, (long long unsigned int)(lv1_peekd(function)));
+		}
+	#endif */
 
 	// -- AV: temporary disable cobra syscall (allow dumpers peek 0x1000 to 0x9800)
 	static uint8_t tmp_lv1peek = 0;
@@ -619,11 +599,12 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 			}
 		}
 
+		// BadWDSD/qCFW only
+		//if(tmp_lv1peek) 		
+		//	return lv1_peekd(function);
 	}
 	else
 		tmp_lv1peek=0;
-	// --
-
 
 	if ((function == SYSCALL8_OPCODE_PS3MAPI) && ((int)param1 == PS3MAPI_OPCODE_REQUEST_ACCESS) && (param2 == ps3mapi_key) && (ps3mapi_access_tries < 3))
 	{
@@ -663,7 +644,10 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 
 	// -- AV: disable cobra without reboot (use lv1 peek)
 	if(disable_cobra)
+	{
+		//return lv1_peekd(function);// BadWDSD/qCFW only
 		return 0;
+	}
 
 	switch (function)
 	{
@@ -697,20 +681,27 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 					return PS3MAPI_OPCODE_SUPPORT_SC8_PEEK_POKE_OK;
 				break;
 				case PS3MAPI_OPCODE_LV1_PEEK:
-					return 0;
+					//return lv1_peekd(param2);// BadWDSD/qCFW only
+					return SUCCEEDED;
 				break;
 				case PS3MAPI_OPCODE_LV1_POKE:
-					return 0;
+					//lv1_poked(param2, param3);// BadWDSD/qCFW only
+					return SUCCEEDED;
 				break;
 				case PS3MAPI_OPCODE_LV2_PEEK:
+					//return lv1_peekd(param2 + 0x1000000ULL);// BadWDSD/OFW only
+					//return lv1_peekd(param2 + 0x8000000ULL);// BadWDSD/qCFW only
 					return *(uint64_t *)param2;
 				break;
+
 				case PS3MAPI_OPCODE_LV2_POKE:
+					//lv1_poked(param2 + 0x1000000ULL, param3);// BadWDSD/OFW only
+					//lv1_poked(param2 + 0x8000000ULL, param3);// BadWDSD/qCFW only
 					if(param2>MKA(hash_checked_area))
 					{
 						*(uint64_t *)param2=param3;
 					}
-					return 0;
+					return SUCCEEDED;
 				break;
 
 				//----------
@@ -812,6 +803,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				case PS3MAPI_OPCODE_GET_RESTORE_SYSCALLS:
 					return allow_restore_sc;
 				break;
+				
 				//----------
 				//REMOVE HOOK
 				//----------
@@ -1060,11 +1052,13 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 
 		default:
 			if (1 <= ps3mapi_partial_disable_syscall8)	return ENOSYS;
-
+			
+			// Partial support for lv1_peek here
+			//return lv1_peekd(function);// BadWDSD/OFW only
 	}
 
 	#ifdef DEBUG
-		DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
+		//DPRINTF("Unsupported syscall8 opcode: 0x%lx\n", function);
 	#endif
 	return ENOSYS;
 }
@@ -1113,8 +1107,10 @@ void create_syscalls(void)
 	create_syscall2(8, syscall8);
 	create_syscall2(6, sys_cfw_peek);
 	create_syscall2(7, sys_cfw_poke);
+	create_syscall2(9, sys_cfw_poke_lv1);
 	//create_syscall2(9, sys_cfw_lv1_poke);
 	create_syscall2(10, sys_cfw_lv1_call);
+	create_syscall2(11, sys_cfw_peek_lv1);
 	//create_syscall2(11, sys_cfw_lv1_peek);
 	create_syscall2(15, sys_cfw_lv2_func);
 	create_syscall2(389, sm_set_fan_policy_sc);
@@ -1124,7 +1120,11 @@ void create_syscalls(void)
 
 static INLINE void apply_kernel_patches(void)
 {
-
+    /// Adding HEN patches on init for stability /// -- START
+	/*#if defined (FIRMWARE_4_82DEX) ||  defined (FIRMWARE_4_84DEX)
+		do_patch(MKA(vsh_patch),0x386000014E800020);
+	#endif*/
+	
 	//do_patch32(MKA(patch_data1_offset), 0x01000000);
 	do_patch32(MKA(module_sdk_version_patch_offset), NOP);
 	do_patch32(MKA(patch_func8_offset1),0x38600000);
@@ -1143,6 +1143,18 @@ static INLINE void apply_kernel_patches(void)
 	do_patch(MKA(PATCH_JUMP),0x2F84000448000098);
 	*(uint64_t *)MKA(ECDSA_FLAG)=0;
 	
+	/// Adding HEN patches on init for stability ///	 -- END
+	/*#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
+		hook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
+	#endif*/
+	
+	hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
+	
+	/*#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
+		hook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
+		hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
+	#endif*/
+	
 	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90) || defined (FIRMWARE_4_91) || defined (FIRMWARE_4_92)
 		hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 		hook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
@@ -1151,9 +1163,11 @@ static INLINE void apply_kernel_patches(void)
 	create_syscall2(8, syscall8);
 	create_syscall2(6, sys_cfw_peek);
 	create_syscall2(7, sys_cfw_poke);
-	//create_syscall2(9, sys_cfw_poke_lv1);
+	create_syscall2(9, sys_cfw_poke_lv1);
+	//create_syscall2(9, sys_cfw_lv1_poke);
 	create_syscall2(10, sys_cfw_lv1_call);
-	//create_syscall2(11, sys_cfw_peek_lv1);
+	create_syscall2(11, sys_cfw_peek_lv1);
+	//create_syscall2(11, sys_cfw_lv1_peek);
 	create_syscall2(15, sys_cfw_lv2_func);
 	create_syscall2(389, sm_set_fan_policy_sc);
 	create_syscall2(409, sm_get_fan_policy_sc);
@@ -1173,11 +1187,13 @@ void enable_ingame_screenshot()
 // Cleanup Old and Temp HEN Files
 void cleanup_files(void)
 {
+	// Old 2.x.x xml paths to avoid conflict for remap fix
 	cellFsUnlink("/dev_hdd0/hen/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/ps3hen_updater.xml");
-	cellFsUnlink("/dev_hdd0/hen/pro_features.xml");// Remap Fix.
+	cellFsUnlink("/dev_hdd0/hen/pro_features.xml");// Remap Fix.														 
 }
+
 
 // Hotkey Buttons pressed at launch
 //static int mappath_disabled=0;// Disable all mappath mappings at launch
@@ -1216,22 +1232,12 @@ extern volatile int sleep_done;
 
 int main(void)
 {
-	#ifdef DEBUG
-		debug_init();
-		debug_install();
-		extern uint64_t _start;
-		extern uint64_t __self_end;
-		DPRINTF("PS3HEN loaded (load base = %p, end = %p) (version = %08X)\n", &_start, &__self_end, MAKE_VERSION(COBRA_VERSION, FIRMWARE_VERSION, IS_CFW));
-	#endif
-
-	//poke_count=0;
-		
 	// Cleanup Old and Temp HEN Files
 	cleanup_files();
 	
 	/* Check for hotkey button presses on launch (updated for 3.2.2 thanks FFF256)
 	CellFsStat stat;
-	if(cellFsStat("/dev_flash/hen/xml/hotkey_polling.off",&stat)!=0)
+	if(cellFsStat("/dev_flash/hen/toggles/hotkey_polling.off",&stat)!=0)
 	{
 		check_combo_buttons();// Pad function fixed 20230422 (thanks aldostools)
 		#ifdef DEBUG
@@ -1240,10 +1246,10 @@ int main(void)
 	}
 	
 	// Check for disabled remap
-	if(cellFsStat("/dev_flash/hen/xml/remap_files.off",&stat)==0)
+	if(cellFsStat("/dev_flash/hen/toggles/remap_files.off",&stat)==0)
 	{
 		mappath_disabled=1;
-		cellFsUnlink("/dev_flash/hen/xml/remap_files.off");
+		cellFsUnlink("/dev_flash/hen/toggles/remap_files.off");
 		#ifdef DEBUG
 			//DPRINTF("PAYLOAD->remap_files.off->Internal mappings disabled until reboot\n");
 		#endif

@@ -25,7 +25,7 @@
 #include "region.h"
 #include "psp.h"
 
-#define MAX_VSH_PLUGINS 			15
+#define MAX_VSH_PLUGINS 			7
 
 #define BOOT_PLUGINS_FILE1			"/dev_usb000/external_boot_plugins.txt"
 #define BOOT_PLUGINS_FILE2			"/dev_usb001/external_boot_plugins.txt"
@@ -987,7 +987,7 @@ LV2_PATCHED_FUNCTION(int, modules_patching, (uint64_t *arg1, uint32_t *arg2))
 				
 				// Check libaudio patch toggle (thanks in1975)
 				// Default is OFF
-				if((i==11) && (cellFsStat("/dev_flash/hen/xml/audio_patch.on",&stat)!=0))
+				if((i==11) && (cellFsStat("/dev_flash/hen/toggles/audio_patch.on",&stat)!=0))
                 {
                     i++;
                     j++;
@@ -1479,6 +1479,7 @@ void load_hen_plugin(void)
 		}
 	}
 }
+
 #ifdef DEBUG
 	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_8(int, create_process_common_hooked, (process_t parent, uint32_t *pid, int fd, char *path, int r7, uint64_t r8, uint64_t r9, void *argp, uint64_t args, void *argp_user, uint64_t sp_80, void **sp_88, uint64_t *sp_90, process_t *process, uint64_t *sp_A0, uint64_t *sp_A8))
 	{

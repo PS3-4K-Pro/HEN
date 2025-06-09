@@ -219,7 +219,7 @@ int addMapping(const char *opath, const char *npath, uint32_t flags) {
 					}
 					mpcount++;
 					#ifdef DEBUG
-						DPRINTF("addMapping: Mapping Added: %s - Mapping Count: %u - Table Mapping Size: 0x%lx bytes\n", opath, mpcount, mapTableByteSize);
+						//DPRINTF("addMapping: Mapping Added: %s - Mapping Count: %u - Table Mapping Size: 0x%lx bytes\n", opath, mpcount, mapTableByteSize);
 					#endif
 					return 0;
 				}
@@ -693,10 +693,10 @@ int map_path(char *oldpath, char *newpath, uint32_t flags)
 		#ifdef DEBUG
 
 			if(ret==0) {
-				DPRINTF("map_path: mapped path: %s -> %s flags %x\n", oldpath, newpath, flags);
+				//DPRINTF("map_path: mapped path: %s -> %s flags %x\n", oldpath, newpath, flags);
 			}
 			else{
-				DPRINTF("map_path: add mapping error %X for path: %s -> %s flags %x\n",ret, oldpath, newpath, flags);
+				//DPRINTF("map_path: add mapping error %X for path: %s -> %s flags %x\n",ret, oldpath, newpath, flags);
 			}
 		#endif
 	}
@@ -922,9 +922,9 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 						if (len < 8) ;
 						else if(!strcmp(photo + len -4, ".PNG") || !strcmp(photo + len -4, ".JPG") || !strcmp(photo + len -8, "_COV.JPG") || !strncasecmp(photo + len -8, ".iso.jpg", 8) || !strncasecmp(photo + len -8, ".iso.png", 8))
 						{
-							/* #ifdef DEBUG
-								DPRINTF("open_path_hook:= CREATING /dev_hdd0/tmp/wm_request\n");
-							#endif */
+							#ifdef DEBUG
+								//DPRINTF("open_path_hook:= CREATING /dev_hdd0/tmp/wm_request\n");
+							#endif
 							int fd;
 							if(cellFsOpen("/dev_hdd0/tmp/wm_request", CELL_FS_O_CREAT | CELL_FS_O_WRONLY | CELL_FS_O_TRUNC, &fd, 0666, NULL, 0) == 0)
 							{
@@ -941,13 +941,13 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 				if(curr) {
 					set_patched_func_param(1, (uint64_t)curr->newpath);
 					#ifdef DEBUG
-						DPRINTF("open_path_hook:= found matching entry for %s in Map Table oldpath: [%s] \nMap Table newpath: [%s] \nMap Table newpath_len: [0x%x]\n",path,curr->oldpath,curr->newpath,(unsigned int)curr->newpath_len);
+						//DPRINTF("open_path_hook:= found matching entry for %s in Map Table oldpath: [%s] \nMap Table newpath: [%s] \nMap Table newpath_len: [0x%x]\n",path,curr->oldpath,curr->newpath,(unsigned int)curr->newpath_len);
 					#endif
 				}
 				else{
-					 #ifdef DEBUG
+					/* #ifdef DEBUG
 						DPRINTF("open_path_hook=: no mapping found for path [%s]\n", path);
-					#endif
+					#endif */
 				}
 				unlock_mtx(&map_mtx);
 			}
