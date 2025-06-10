@@ -25,7 +25,7 @@
 #include "region.h"
 #include "psp.h"
 
-#define MAX_VSH_PLUGINS 			15
+#define MAX_VSH_PLUGINS 			7
 
 #define BOOT_PLUGINS_FILE1			"/dev_usb000/external_boot_plugins.txt"
 #define BOOT_PLUGINS_FILE2			"/dev_usb001/external_boot_plugins.txt"
@@ -114,6 +114,7 @@ uint8_t condition_psp_keys = 0;
 uint8_t condition_psp_change_emu = 0;
 uint8_t condition_psp_prometheus = 0;
 uint8_t condition_pemucorelib = 1;
+//uint8_t gameboot_mode = 0;
 uint64_t vsh_check;
 //uint8_t condition_game_ext_psx=0;
 
@@ -187,13 +188,27 @@ SprxPatch ps1_netemu_patches[] =
 	{ 0 }
 };
 
+/*void check_gameboot_toggle(void)
+{
+	CellFsStat stat;
+
+	if (cellFsStat("/dev_hdd0/hen/toggles/gameboot.on", &stat) == 0)
+	{
+		gameboot_mode = 1;
+	}
+	else
+	{
+		gameboot_mode = 0;
+	}
+} */
+
 SprxPatch game_ext_plugin_patches[] =
 {
 	{ sfo_check_offset, NOP, &condition_true },
 	//{ ps2_nonbw_offset3, LI(R0, 1), &condition_ps2softemu },
 	{ ps_region_error_offset, NOP, &condition_true }, // Needed sometimes...
 	{ remote_play_offset, 0x419e0028, &condition_true },
-	{ gameboot_offset, LI(R3, 2), &condition_true },
+	//{ gameboot_offset, LI(R3, 2), &gameboot_mode  },
 	//{ ps_video_error_offset, LI(R3, 0), &condition_game_ext_psx },
 	//{ ps_video_error_offset+4, BLR, &condition_game_ext_psx }, // experimental, disabled due to its issue with remote play
 	{ 0 }
@@ -987,7 +1002,7 @@ LV2_PATCHED_FUNCTION(int, modules_patching, (uint64_t *arg1, uint32_t *arg2))
 				
 				// Check libaudio patch toggle (thanks in1975)
 				// Default is OFF
-				if((i==11) && (cellFsStat("/dev_flash/hen/xml/audio_patch.on",&stat)!=0))
+				if((i==11) && (cellFsStat("/dev_flash/hen/toggles/audio_patch.on",&stat)!=0))
                 {
                     i++;
                     j++;
@@ -1479,6 +1494,7 @@ void load_hen_plugin(void)
 		}
 	}
 }
+
 #ifdef DEBUG
 	LV2_HOOKED_FUNCTION_PRECALL_SUCCESS_8(int, create_process_common_hooked, (process_t parent, uint32_t *pid, int fd, char *path, int r7, uint64_t r8, uint64_t r9, void *argp, uint64_t args, void *argp_user, uint64_t sp_80, void **sp_88, uint64_t *sp_90, process_t *process, uint64_t *sp_A0, uint64_t *sp_A8))
 	{

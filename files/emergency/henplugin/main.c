@@ -8,8 +8,9 @@
 #include <sys/timer.h>
 #include <sys/event.h>
 #include <sys/syscall.h>
+//#include <sys/socket.h>
 #include <sys/memory.h>
-#include <sys/ss_get_open_psid.h>
+//#include <sys/ss_get_open_psid.h>
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -17,25 +18,35 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <time.h>
+//#include <time.h>
 #include <types.h>
 #include "allocator.h"
 #include "common.h"
 #include "stdc.h"
+//#include "download_plugin.h"
+//#include "game_ext_plugin.h"
+//#include "xmb_plugin.h"
+
 #include "typew.h"
 #include "vpad.h"
 #include "xregistry.h"
 //#include "paf.h"
 
-#include <sys/sys_time.h>
+//#include <sys/sys_time.h>
 #include <sys/types.h>
+//#include <sys/socket.h>
 #include <sys/syscall.h>
-#include <sys/timer.h>
-
+//#include <sys/timer.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
+//#include <netdb.h>
+//#include <netex/net.h>
+//#include <netex/errno.h>
 #include <cell/fs/cell_fs_errno.h>
 #include <cell/fs/cell_fs_file_api.h>
 #include <ppu_intrinsics.h>
 #include <cstdlib>
+
 
 SYS_MODULE_INFO(HENPLUGIN, 0, 1, 0);
 SYS_MODULE_START(henplugin_start);
@@ -56,8 +67,11 @@ extern uint32_t vshmain_EB757101(void);        // get running mode flag, 0 = XMB
 
 static sys_ppu_thread_t thread_id=-1;
 
+
+
 int henplugin_start(uint64_t arg);
 int henplugin_stop(void);
+
 
 extern int vshmain_87BB0001(int param);
 int (*vshtask_notify)(int, const char *) = NULL;
@@ -65,38 +79,6 @@ int (*vshtask_notify)(int, const char *) = NULL;
 //static int (*vshmain_is_ss_enabled)(void) = NULL;
 static int (*View_Find)(const char *) = NULL;
 static void *(*plugin_GetInterface)(int,int) = NULL;
-
-// Debug Log to external device
-#define LOG_FILE_PATH "/dev_usb000/PS3HEN.log"
-void DLOG(const char *format, ...);
-void DLOG(const char *format, ...) {
-    CellFsStat stat;
-    CellFsErrno fsErr;
-    uint64_t written;
-    int fd;
-    char buffer[256];
-
-    fsErr = cellFsStat("/dev_usb000/", &stat);
-    if (fsErr != CELL_FS_SUCCEEDED) {
-        DPRINTF("HENPLUGIN->USB device not found: 0x%08x\n", fsErr);
-        return;
-    }
-
-    fsErr = cellFsOpen(LOG_FILE_PATH, CELL_FS_O_WRONLY | CELL_FS_O_CREAT | CELL_FS_O_APPEND, &fd, NULL, 0);
-    if (fsErr != CELL_FS_SUCCEEDED) {
-        DPRINTF("HENPLUGIN->Failed to open log file: 0x%08x\n", fsErr);
-        return;
-    }
-
-    va_list args;
-    va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-
-    cellFsWrite(fd, buffer, strlen(buffer), &written);
-
-    cellFsClose(fd);
-}
 
 // Play RCO Sound
 extern void paf_B93AFE7E(uint32_t plugin, const char *sound, float arg1, int arg2);
@@ -441,18 +423,32 @@ static int sysLv2FsMkdir(const char *path, int mode)
     return_to_user_prog(int);
 }
 
-/* static int sysLv2FsRename(const char *from, const char *to)
+/*static int sysLv2FsRename(const char *from, const char *to)
 {
     system_call_2(812, (uint64_t)(uintptr_t)from, (uint64_t)(uintptr_t)to);
     return_to_user_prog(int);
-}
-*/
+}*/
+
 
 /*static int sys_timer_sleep(uint64_t sleep_time)
 {
 	system_call_1(0x8e,sleep_time);
 	return (int)p1;
-}*/			   
+}*/
+
+uint64_t lv1_peek(uint64_t addr);
+uint64_t lv1_peek(uint64_t addr)
+{
+	system_call_1(11, addr);
+	return_to_user_prog(uint64_t);
+}
+
+/*void lv1_poke(uint64_t addr, uint64_t val);
+void lv1_poke(uint64_t addr, uint64_t val)
+{
+	system_call_2(9, addr, val);
+}*/
+
 // LED Control (thanks aldostools)
 #define SC_SYS_CONTROL_LED     386
 #define LED_GREEN              1
@@ -470,36 +466,26 @@ static void led(uint64_t color, uint64_t mode) {
 
 // Resets all LEDs to OFF
 static void reset_leds(void);
-static void reset_leds(void) 
-{
+static void reset_leds(void) {
     led(LED_RED, LED_OFF);
     led(LED_GREEN, LED_OFF);
 }
- 
+
 static void set_led(const char* preset);
-static void set_led(const char* preset)
-{
- 
+static void set_led(const char* preset) {
     DPRINTF("HENPLUGIN->set_led->preset: %s\n", preset);
     reset_leds();  // Turn off all LEDs initially
 
-    if (strcmp(preset, "install_start") == 0)
-	{
+    if (strcmp(preset, "install_start") == 0) {
         DPRINTF("HENPLUGIN->set_led->install_start\n");
         led(LED_GREEN, LED_BLINK_FAST);
-    }
-	else if (strcmp(preset, "install_success") == 0)
-	{
+    } else if (strcmp(preset, "install_success") == 0) {
         DPRINTF("HENPLUGIN->set_led->install_success\n");
         led(LED_GREEN, LED_ON);
-    }
-	else if (strcmp(preset, "install_failed") == 0)
-	{
-		DPRINTF("HENPLUGIN->set_led->install_failed\n");
+    } else if (strcmp(preset, "install_failed") == 0) {
+        DPRINTF("HENPLUGIN->set_led->install_failed\n");
         led(LED_RED, LED_BLINK_FAST);
-    }
-	else if (strcmp(preset, "off") == 0)
-	{
+    } else if (strcmp(preset, "off") == 0) {
         DPRINTF("HENPLUGIN->set_led->off\n");
         reset_leds();
     }
@@ -526,26 +512,13 @@ static void show_msg(char* msg)
 	vshtask_notify(0, msg);
 
 }
-
-// This one checks the current user number -4 and + 20
-/* static int number_users(void) 
-{
-	CellFsStat stat;
-	char path1[64];
-	int num=0;
-	
-	for (int i = xsetting_CC56EB2D()->GetCurrentUserNumber()-4; i < xsetting_CC56EB2D()->GetCurrentUserNumber()+20; i++)
-	{
-		sprintf(path1, "/dev_hdd0/home/%08i/localusername", i);
-		
-		if(cellFsStat(path1,&stat) == CELL_FS_SUCCEEDED)
-		{
-		 num+=1;
-		}
-	}
-	return num;
-}
-*/
+#define process_id_t uint32_t
+#define SYSCALL8_OPCODE_PS3MAPI			 		0x7777
+#define PS3MAPI_OPCODE_GET_ALL_PROC_PID			0x0021
+#define PS3MAPI_OPCODE_GET_PROC_NAME_BY_PID		0x0022
+#define PS3MAPI_OPCODE_GET_PROC_MEM				0x0031
+#define PS3MAPI_OPCODE_SET_PROC_MEM				0x0032
+#define MAX_PROCESS 16
 
 // Find only 2 valid users to reload the xmb
 static int number_users(void)
@@ -609,7 +582,13 @@ static void enable_ingame_screenshot(void)
 {
 	((int*)getNIDfunc("vshmain",0x981D7E9F,0))[0] -= 0x2C;
 }
-
+/*
+static int sys_map_path(char *old, char *new)
+{
+	system_call_2(35, (uint64_t)(uint32_t)old,(uint64_t)(uint32_t)new);
+	return (int)p1;
+}
+*/
 static void reload_xmb(void)
 {
 	while(!IS_ON_XMB)
@@ -621,7 +600,7 @@ static void reload_xmb(void)
 	
 	CellFsStat stat;
 	
-	if((cellFsStat("/dev_flash/hen/xml/reload_xmb.on",&stat)==0) && (number_users()>1))
+	if((cellFsStat("/dev_flash/hen/toggles/reload_xmb.on",&stat)==0) && (number_users()>1))
 	{
 		explore_interface->ExecXMBcommand("close_all_list", 0, 0);
 		explore_interface->ExecXMBcommand("focus_category user", 0, 0);
@@ -686,12 +665,12 @@ static void stop_prx_module(void)
 
 #define SYSCALL8_OPCODE_HEN_REV		0x1339
 
+
 // Toggles can be accessed by HFW Tools menu
 // Clear Browser and PSN Cache (thanks xfrcc for original idea)
 // Clear PSN cache (thanks LuanTeles)
 void clear_web_cache_check(void);
-void clear_web_cache_check(void) 
-{
+void clear_web_cache_check(void) {
     DPRINTF("HENPLUGIN->Clear Web Cache Check Started\n");
     int userNumber = xsetting_CC56EB2D()->GetCurrentUserNumber();
     CellFsStat stat;
@@ -705,12 +684,12 @@ void clear_web_cache_check(void)
         "/dev_hdd0/home/%08i/community/PTL.TMP"
     };
     const char* toggles[] = {
-        "/dev_flash/hen/xml/clear_web_history.on",
-        "/dev_flash/hen/xml/clear_web_auth_cache.on",
-        "/dev_flash/hen/xml/clear_web_cookie.on",
-        "/dev_flash/hen/xml/clear_ci.on",
-        "/dev_flash/hen/xml/clear_mi.on",
-        "/dev_flash/hen/xml/clear_ptl.on"
+        "/dev_flash/hen/toggles/clear_web_history.on",
+        "/dev_flash/hen/toggles/clear_web_auth_cache.on",
+        "/dev_flash/hen/toggles/clear_web_cookie.on",
+        "/dev_flash/hen/toggles/clear_ci.on",
+        "/dev_flash/hen/toggles/clear_mi.on",
+        "/dev_flash/hen/toggles/clear_ptl.on"
     };
 
     char msg[0x400];
@@ -745,7 +724,7 @@ void clear_web_cache_check(void)
 
     if (cleared_total > 0) {
         DPRINTF("HENPLUGIN->Clear Web Cache Check Finished\n");
-       //show_msg(msg);
+        //show_msg(msg);
     } else {
         DPRINTF("HENPLUGIN->No Clear Web Cache Toggles Activated\n");
     }
@@ -799,8 +778,6 @@ void create_default_dirs(void) {
     DPRINTF("HENPLUGIN->Done checking and creating default directories under /dev_hdd0/\n");
 }
 
-//cellFsMkdir((char*)"/dev_hdd0/PROISO", 0777);
-
 // Shamelessly taken and modified from webmanMOD (thanks aldostools)
 static void play_rco_sound(const char *sound)
 {
@@ -814,6 +791,7 @@ static void play_rco_sound(const char *sound)
 }
 
 int compare_files(const char *file1, const char *file2)
+							   
 {
     uint64_t size1 = 0, size2 = 0;
 
@@ -902,6 +880,22 @@ static void delete_folders(void)
 {
 		delete_recursive("/dev_hdd0/tmp/explore/nsx");
 		delete_recursive("/dev_hdd0/tmp/explore/xil2");
+}
+
+static void copy_fps_counter(void)
+{
+ CellFsStat stat;
+	
+	if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0))
+	{
+		//webMAN
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.yaml");
+		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+		filecopy("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
+	}
 }
 
 static void copy_files(void)
@@ -1131,8 +1125,8 @@ static void check_xmb_files(void)
             }
         }
     }
-
- 	/* if (corrupted)
+	
+	/* if (corrupted)
     {
 		 char categories_xml[0x80];
 		 char xmb_reboot_txt[0x80];
@@ -1157,21 +1151,15 @@ static void check_xmb_files(void)
     return;
 }
 
-static void copy_files_symbolic(void);
+/* static void copy_files_symbolic(void);
 static void copy_files_symbolic(void)
 {
-	CellFsStat stat;
-	
-	if((cellFsStat("/dev_hdd0/plugins/fps_counter.off",&stat)==0) && (cellFsStat("/dev_hdd0/plugins/fps_counter.yaml",&stat)==0))
-	{
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/fps_counter.yaml");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.off","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.off","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
-	}
+	//if webMAN updates the original file will be replaced
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
 }
+*/
 
 static void check_files(void)
 {
@@ -1184,6 +1172,18 @@ static void check_files(void)
 		char plugins_txt[0x80];
 		sprintf(plugins_txt, "Plugins redefined!");
 		show_msg((char *)plugins_txt);
+}
+
+static void check_badwdsd(void);
+static void check_badwdsd(void)
+{
+	// Check partial text string (Sony Cel) in LV1 that is normally inaccessible from hen
+	// TODO: find a better way later (from payload?)
+	if (lv1_peek(0x323740) == 0x536F6E792043656CULL) {
+		char msg_badwdsd[0x80];
+		sprintf(msg_badwdsd, "BadWDSD has been detected.\nYou have elevated privileges!");
+		show_msg((char *)msg_badwdsd);
+	}
 }
 
 #define SC_RING_BUZZER  				(392)
@@ -1224,12 +1224,12 @@ static void show_notification(void)
 		
 		sys_timer_usleep(5000000);
 		
-		if (cellFsStat("/dev_flash/hen/xml/beep.on", &stat) == 0)
+		if (cellFsStat("/dev_flash/hen/toggles/beep.on", &stat) == 0)
 		{
 			BEEP3;
 		}
 	
-		show_msg((char *)welcome_notification);
+		show_msg((char *)welcome_notification); 
 	}
 }
 
@@ -1245,17 +1245,19 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 		sys_timer_usleep(70000);
 	}
 	explore_interface = (explore_plugin_interface *)plugin_GetInterface(view, 1);
-
+	
 	enable_ingame_screenshot();
 	reload_xmb();
 	delete_folders();
+	copy_fps_counter();
+	check_files();
+	check_xmb_files();
+	check_badwdsd();
+	//copy_files_symbolic();
 	create_default_dirs();
 	restore_act_dat();
-	check_xmb_files();
-	copy_files_symbolic();
+	clear_web_cache_check();
 	show_notification();
-	check_files();
-	clear_web_cache_check();// Clear WebBrowser cache check (thanks xfrcc)
 	
 	sys_ppu_thread_exit(0);
 }

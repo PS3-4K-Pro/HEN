@@ -1121,9 +1121,6 @@ void create_syscalls(void)
 static INLINE void apply_kernel_patches(void)
 {
     /// Adding HEN patches on init for stability /// -- START
-	/*#if defined (FIRMWARE_4_82DEX) ||  defined (FIRMWARE_4_84DEX)
-		do_patch(MKA(vsh_patch),0x386000014E800020);
-	#endif*/
 	
 	//do_patch32(MKA(patch_data1_offset), 0x01000000);
 	do_patch32(MKA(module_sdk_version_patch_offset), NOP);
@@ -1144,17 +1141,8 @@ static INLINE void apply_kernel_patches(void)
 	*(uint64_t *)MKA(ECDSA_FLAG)=0;
 	
 	/// Adding HEN patches on init for stability ///	 -- END
-	/*#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-		hook_function_with_precall(get_syscall_address(801),sys_fs_open,6);
-	#endif*/
-	
 	hook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
-	
-	/*#if defined(FIRMWARE_4_82DEX) || defined (FIRMWARE_4_84DEX)
-		hook_function_with_precall(get_syscall_address(804),sys_fs_close,1);
-		hook_function_with_precall(get_syscall_address(802),sys_fs_read,4);
-	#endif*/
-	
+
 	#if defined (FIRMWARE_4_80) || defined (FIRMWARE_4_81) || defined (FIRMWARE_4_82) || defined (FIRMWARE_4_83) || defined (FIRMWARE_4_84) || defined (FIRMWARE_4_85) || defined (FIRMWARE_4_86) || defined (FIRMWARE_4_87) || defined (FIRMWARE_4_88) || defined (FIRMWARE_4_89) || defined (FIRMWARE_4_90) || defined (FIRMWARE_4_91) || defined (FIRMWARE_4_92)
 		hook_function_with_cond_postcall(um_if_get_token_symbol,um_if_get_token,5);
 		hook_function_with_cond_postcall(update_mgr_read_eeprom_symbol,read_eeprom_by_offset,3);
@@ -1191,9 +1179,8 @@ void cleanup_files(void)
 	cellFsUnlink("/dev_hdd0/hen/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/hfw_settings.xml");
 	cellFsUnlink("/dev_hdd0/hen/xml/ps3hen_updater.xml");
-	cellFsUnlink("/dev_hdd0/hen/pro_features.xml");// Remap Fix.														 
+	cellFsUnlink("/dev_hdd0/hen/pro_features.xml");// Remap Fix.
 }
-
 
 // Hotkey Buttons pressed at launch
 //static int mappath_disabled=0;// Disable all mappath mappings at launch
@@ -1253,8 +1240,7 @@ int main(void)
 		#ifdef DEBUG
 			//DPRINTF("PAYLOAD->remap_files.off->Internal mappings disabled until reboot\n");
 		#endif
-	}
-	
+	}	
 	*/
 
 	CellFsStat stat;
@@ -1327,13 +1313,10 @@ int main(void)
 			}
 			
 			// Enables Gameboot sound. (Extra: Region Block, PS3 HDD whitelisted games crash, LIC.EDAT license check bypassed)
-			/* Gameboot now is patched via payload for stability 
-			
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",&stat)==0))
 			{
 				map_path("/dev_flash/vsh/module/game_ext_plugin.sprx","/dev_flash/vsh/resource/AAA/game_ext_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
-			*/
 
 			// Enables Music player visualization mods. (Note: May cause black screen on exit while in memory hungry games)
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/custom_render_plugin.sprx",&stat)==0))

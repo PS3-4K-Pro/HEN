@@ -26,5 +26,3 @@ int sys_read_cobra_config(CobraConfig *cfg);
 int sys_write_cobra_config(CobraConfig *cfg);
 
 #endif /* __CONFIG_H__ */
-
-

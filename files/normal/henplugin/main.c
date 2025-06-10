@@ -882,6 +882,22 @@ static void delete_folders(void)
 		delete_recursive("/dev_hdd0/tmp/explore/xil2");
 }
 
+static void copy_fps_counter(void)
+{
+ CellFsStat stat;
+	
+	if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0))
+	{
+		//webMAN
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.yaml");
+		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+		filecopy("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
+	}
+}
+
 static void copy_files(void)
 {
     CellFsStat stat;
@@ -1135,21 +1151,15 @@ static void check_xmb_files(void)
     return;
 }
 
-static void copy_files_symbolic(void);
+/* static void copy_files_symbolic(void);
 static void copy_files_symbolic(void)
 {
-	CellFsStat stat;
-	
-	if((cellFsStat("/dev_hdd0/plugins/fps_counter.off",&stat)==0) && (cellFsStat("/dev_hdd0/plugins/fps_counter.yaml",&stat)==0))
-	{
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
-		cellFsUnlink("/dev_hdd0/tmp/wm_res/fps_counter.yaml");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.off","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.off","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
-		sysLv2FsLink("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
-	}
+	//if webMAN updates the original file will be replaced
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
+	//sysLv2FsLink("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");
 }
+*/
 
 static void check_files(void)
 {
@@ -1314,15 +1324,16 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	
 	enable_ingame_screenshot();
 	reload_xmb();
-	check_badwdsd();
 	delete_folders();
-	create_default_dirs();
-	restore_act_dat();
+	copy_fps_counter();
 	check_files();
 	check_xmb_files();
-	copy_files_symbolic();
+	check_badwdsd();
+	//copy_files_symbolic();
+	create_default_dirs();
+	restore_act_dat();
+	clear_web_cache_check();
 	show_notification();
-	clear_web_cache_check();// Clear WebBrowser cache check (thanks xfrcc)
 	
 	sys_ppu_thread_exit(0);
 }

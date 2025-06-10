@@ -114,6 +114,7 @@ uint8_t condition_psp_keys = 0;
 uint8_t condition_psp_change_emu = 0;
 uint8_t condition_psp_prometheus = 0;
 uint8_t condition_pemucorelib = 1;
+//uint8_t gameboot_mode = 0;
 uint64_t vsh_check;
 //uint8_t condition_game_ext_psx=0;
 
@@ -187,13 +188,27 @@ SprxPatch ps1_netemu_patches[] =
 	{ 0 }
 };
 
+/*void check_gameboot_toggle(void)
+{
+	CellFsStat stat;
+
+	if (cellFsStat("/dev_hdd0/hen/toggles/gameboot.on", &stat) == 0)
+	{
+		gameboot_mode = 1;
+	}
+	else
+	{
+		gameboot_mode = 0;
+	}
+} */
+
 SprxPatch game_ext_plugin_patches[] =
 {
 	{ sfo_check_offset, NOP, &condition_true },
 	//{ ps2_nonbw_offset3, LI(R0, 1), &condition_ps2softemu },
 	{ ps_region_error_offset, NOP, &condition_true }, // Needed sometimes...
 	{ remote_play_offset, 0x419e0028, &condition_true },
-	{ gameboot_offset, LI(R3, 2), &condition_true },
+	//{ gameboot_offset, LI(R3, 2), &gameboot_mode  },
 	//{ ps_video_error_offset, LI(R3, 0), &condition_game_ext_psx },
 	//{ ps_video_error_offset+4, BLR, &condition_game_ext_psx }, // experimental, disabled due to its issue with remote play
 	{ 0 }

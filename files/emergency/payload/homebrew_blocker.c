@@ -171,6 +171,7 @@ int block_homebrew(const char *path)
 
 	return allow;
 }
+
 static int check_syscalls()
 {
 	uint8_t syscalls_disabled = ((*(uint64_t *)MKA(syscall_table_symbol + 8 * 6)) == (*(uint64_t *)MKA(syscall_table_symbol)));

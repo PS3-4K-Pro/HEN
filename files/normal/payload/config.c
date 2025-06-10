@@ -175,6 +175,3 @@ int sys_write_cobra_config(CobraConfig *cfg)
 	
 	return write_cobra_config();
 }
-
-
-

@@ -1328,7 +1328,6 @@ int disable_patches()
 	unhook_all_storage_ext();
 	unhook_all_region();
 	unhook_all_map_path();
-	
 	unhook_function_with_cond_postcall(get_syscall_address(724),bnet_ioctl,3);
 	//remove_pokes();
 		
