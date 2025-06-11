@@ -687,9 +687,9 @@ void clear_web_cache_check(void) {
         "/dev_flash/hen/toggles/clear_web_history.on",
         "/dev_flash/hen/toggles/clear_web_auth_cache.on",
         "/dev_flash/hen/toggles/clear_web_cookie.on",
-        "/dev_flash/hen/toggles/clear_ci.on",
-        "/dev_flash/hen/toggles/clear_mi.on",
-        "/dev_flash/hen/toggles/clear_ptl.on"
+        "/dev_flash/hen/toggles/clear_system_information.on",
+        "/dev_flash/hen/toggles/clear_system_information.on",
+        "/dev_flash/hen/toggles/clear_system_information.on"
     };
 
     char msg[0x400];
@@ -1273,7 +1273,7 @@ static void show_notification(void)
 	CellFsStat stat;
 	char welcome_notification[0x80] = "";
 	
-	if (cellFsStat("/dev_hdd0/plugins/webftp_server.sprx", &stat) != 0)
+	if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0) && (cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)!=0))
 	{
 		if (cellFsStat("/dev_flash/vsh/etc/premium.txt", &stat) == 0)
 		{
@@ -1304,8 +1304,9 @@ static void show_notification(void)
 		{
 			BEEP3;
 		}
-	
-		show_msg((char *)welcome_notification); 
+		
+		show_msg((char *)welcome_notification);
+
 	}
 }
 

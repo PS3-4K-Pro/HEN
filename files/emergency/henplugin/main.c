@@ -687,9 +687,9 @@ void clear_web_cache_check(void) {
         "/dev_flash/hen/toggles/clear_web_history.on",
         "/dev_flash/hen/toggles/clear_web_auth_cache.on",
         "/dev_flash/hen/toggles/clear_web_cookie.on",
-        "/dev_flash/hen/toggles/clear_ci.on",
-        "/dev_flash/hen/toggles/clear_mi.on",
-        "/dev_flash/hen/toggles/clear_ptl.on"
+        "/dev_flash/hen/toggles/clear_system_information.on",
+        "/dev_flash/hen/toggles/clear_system_information.on",
+        "/dev_flash/hen/toggles/clear_system_information.on"
     };
 
     char msg[0x400];
@@ -1228,8 +1228,9 @@ static void show_notification(void)
 		{
 			BEEP3;
 		}
-	
+		
 		show_msg((char *)welcome_notification); 
+		
 	}
 }
 
