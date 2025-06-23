@@ -892,6 +892,7 @@ static void copy_fps_counter(void)
 		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
 		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
 		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.yaml");
+		cellFsUnlink("/dev_hdd0/tmp/wm_res/fps_counter.yaml");
 		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
 		filecopy("/dev_hdd0/plugins/fps_counter.sprx","/dev_hdd0/tmp/wm_res/VshFpsCounterM.sprx");
 		filecopy("/dev_hdd0/plugins/fps_counter.yaml","/dev_hdd0/tmp/wm_res/fps_counter.yaml");

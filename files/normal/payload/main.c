@@ -1240,7 +1240,7 @@ int main(void)
 		#ifdef DEBUG
 			//DPRINTF("PAYLOAD->remap_files.off->Internal mappings disabled until reboot\n");
 		#endif
-	}	
+	}
 	*/
 
 	CellFsStat stat;
@@ -1361,9 +1361,10 @@ int main(void)
 			}
 			
 			// Unlocks the "System Update via Internet" option only when WebMAN ps3-updatelist.txt is redirected.
-			if((cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.rco",&stat)==0) && (cellFsStat("/dev_hdd0/ps3-updatelist.txt",&stat)==0) && (cellFsStat("/dev_hdd0/boot_plugins.txt",&stat)==0) && ((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0)))
+			if((cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.rco",&stat)==0) && (cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",&stat)==0) && (cellFsStat("/dev_hdd0/ps3-updatelist.txt",&stat)==0) && (cellFsStat("/dev_hdd0/boot_plugins.txt",&stat)==0) && ((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0)))
 			{
 				map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);
+				map_path("/dev_flash/vsh/module/software_update_plugin.sprx","/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
 
 			// Enables automatic GTE widescreen patches on PS1 games.
