@@ -10,8 +10,8 @@
 #include <lv2/syscall.h>
 //#include <lv2/usb.h>
 #include <lv2/storage.h>
-#include <lv2/thread.h>
-#include <lv2/synchronization.h>
+//#include <lv2/thread.h>
+//#include <lv2/synchronization.h>
 #include <lv2/modules.h>
 #include <lv2/io.h>
 #include <lv2/time.h>
@@ -89,11 +89,11 @@
 #elif defined(FIRMWARE_4_89)
 	#define FIRMWARE_VERSION	0x0489
 #elif defined(FIRMWARE_4_90)
-	#define FIRMWARE_VERSION	0x0490	
+	#define FIRMWARE_VERSION	0x0490
 #elif defined(FIRMWARE_4_91)
 	#define FIRMWARE_VERSION	0x0491
 #elif defined(FIRMWARE_4_92)
-	#define FIRMWARE_VERSION	0x0492	
+	#define FIRMWARE_VERSION	0x0492
 #endif
 
 #if defined(CFW)
@@ -358,11 +358,25 @@ LV2_HOOKED_FUNCTION(void, sys_cfw_new_poke, (uint64_t *addr, uint64_t value))
 	asm volatile("icbi 0,%0; isync" :: "r"(addr));
 }
 
+uint32_t BadWDSD_IsExploited()
+{
+	uint64_t lpar_addr = 0;
+
+	int32_t res = lv1_undocumented_function_114(0, 0x0c, 0x1000, &lpar_addr);
+
+	if (res != 0)
+		return 0;
+
+	lv1_undocumented_function_115(lpar_addr);
+
+	return 1;
+}
 // LV1
 #define HV_BASE						0x8000000014000000ULL	// where in lv2 to map lv1
 #define HV_PAGE_SIZE				0x0c					// 4k = 0x1000 (1 << 0x0c)
 //#include <lv1/mm.h>
-LV2_SYSCALL2(uint64_t, sys_cfw_peek_lv1, (uint64_t _addr))
+
+uint64_t lv1_peek_114(uint64_t _addr)
 {
 	uint64_t ret = 0;
 	uint64_t mmap_lpar_addr=0;
@@ -380,7 +394,7 @@ LV2_SYSCALL2(uint64_t, sys_cfw_peek_lv1, (uint64_t _addr))
 	return ret;
 }
 
-LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
+void lv1_poke_114(uint64_t _addr, uint64_t value)
 {
 	uint64_t mmap_lpar_addr=0;
 	uint64_t _offset = (_addr & 0xFFFFFFFFFFFFF000ULL);
@@ -395,6 +409,126 @@ LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
 	}
 
 	return;
+}
+
+uint32_t BadWDSD_IsHvcallInstalled()
+{
+	return lv1_test_peekpoke();
+}
+
+void BadWDSD_TryInstallHvcall()
+{
+	if (!BadWDSD_IsExploited())
+		return;
+
+	if (BadWDSD_IsHvcallInstalled())
+		return;
+
+	#ifdef DEBUG
+		DPRINTF("BadWDSD_TryInstallHvcall()\n");
+	#endif
+
+	uint64_t table_addr = 0x372D08; // >= 4.70?
+
+	{
+		{
+			#ifdef DEBUG
+				DPRINTF("Installing hvcall peek64(34)\n");
+			#endif
+
+			uint64_t code_addr = 0x130;
+			lv1_poke_114(code_addr + 0, 0xE86300004E800020);
+
+			lv1_poke_114(table_addr + (34 * 8), code_addr);
+		}
+
+		{
+			#ifdef DEBUG
+				DPRINTF("Installing hvcall poke64(35)\n");
+			#endif
+
+			uint64_t code_addr = 0x140;
+
+			lv1_poke_114(code_addr + 0, 0xF883000038600000);
+			lv1_poke_114(code_addr + 8, 0x4E80002000000000);
+
+			lv1_poke_114(table_addr + (35 * 8), code_addr);
+		}
+
+//#if !DEBUG
+#if 1
+
+		{
+			#ifdef DEBUG
+				DPRINTF("Installing hvcall exec(36)\n");
+			#endif
+
+			uint64_t code_addr = 0x150;
+
+			lv1_poke_114(code_addr + 0, 0x3821FFF07C0802A6);
+			lv1_poke_114(code_addr + 8, 0xF80100003821FF80);
+
+			lv1_poke_114(code_addr + 16, 0x7D2903A64E800421);
+			lv1_poke_114(code_addr + 24, 0x38210080E8010000);
+
+			lv1_poke_114(code_addr + 32, 0x7C0803A638210010);
+			lv1_poke_114(code_addr + 40, 0x4E80002000000000);
+
+			lv1_poke_114(table_addr + (36 * 8), code_addr);
+		}
+
+		{
+			#ifdef DEBUG
+				DPRINTF("Installing hvcall peek32(37)\n");
+			#endif
+
+			uint64_t code_addr = 0x180;
+			lv1_poke_114(code_addr + 0, 0x806300004E800020);
+
+			lv1_poke_114(table_addr + (37 * 8), code_addr);
+		}
+
+		{
+			#ifdef DEBUG
+				DPRINTF("Installing hvcall poke32(38)\n");
+			#endif
+
+			uint64_t code_addr = 0x190;
+
+			lv1_poke_114(code_addr + 0, 0x9083000038600000);
+			lv1_poke_114(code_addr + 8, 0x4E80002000000000);
+
+			lv1_poke_114(table_addr + (38 * 8), code_addr);
+		}
+
+#endif
+	}
+
+	if (!BadWDSD_IsHvcallInstalled())
+	{
+		#ifdef DEBUG
+			DPRINTF("Install failed!\n");
+		#endif
+		return;
+	}
+
+	#ifdef DEBUG
+		DPRINTF("Install success!\n");
+	#endif
+}
+
+LV2_SYSCALL2(uint64_t, sys_cfw_peek_lv1, (uint64_t _addr))
+{
+	//DPRINTF("lv1 peekd addr = 0x%lx, val = 0x%lx\n", _addr, lv1_peekd(_addr));
+
+	return lv1_peekd(_addr);
+}
+
+LV2_SYSCALL2(void, sys_cfw_poke_lv1, (uint64_t _addr, uint64_t value))
+{
+	//DPRINTF("lv1 poked addr = 0x%lx, val = 0x%lx\n", _addr, value);
+
+	lv1_poked(_addr, value);
 }
 
 LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len))
@@ -416,7 +550,6 @@ LV2_HOOKED_FUNCTION(void *, sys_cfw_memcpy, (void *dst, void *src, uint64_t len)
 //#define MAX_POKES	0x100
 //POKES pokes[MAX_POKES];
 //int poke_count=0;
-
 
 LV2_SYSCALL2(void, sys_cfw_poke, (uint64_t *ptr, uint64_t value))
 {
@@ -600,8 +733,8 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 		}
 
 		// BadWDSD/qCFW only
-		//if(tmp_lv1peek) 		
-		//	return lv1_peekd(function);
+		if(tmp_lv1peek)
+			return lv1_peekd(function);
 	}
 	else
 		tmp_lv1peek=0;
@@ -645,8 +778,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 	// -- AV: disable cobra without reboot (use lv1 peek)
 	if(disable_cobra)
 	{
-		//return lv1_peekd(function);// BadWDSD/qCFW only
-		return 0;
+		return lv1_peekd(function);// BadWDSD/qCFW only
 	}
 
 	switch (function)
@@ -673,7 +805,6 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				case PS3MAPI_OPCODE_GET_FW_TYPE:
 					return ps3mapi_get_fw_type((char *)param2);
 				break;
-
 				//----------------
 				//PEEK & POKE (av)
 				//----------------
@@ -681,29 +812,22 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 					return PS3MAPI_OPCODE_SUPPORT_SC8_PEEK_POKE_OK;
 				break;
 				case PS3MAPI_OPCODE_LV1_PEEK:
-					//return lv1_peekd(param2);// BadWDSD/qCFW only
-					return SUCCEEDED;
+					return lv1_peekd(param2);// BadWDSD/qCFW only
 				break;
 				case PS3MAPI_OPCODE_LV1_POKE:
-					//lv1_poked(param2, param3);// BadWDSD/qCFW only
+					lv1_poked(param2, param3);// BadWDSD/qCFW only
 					return SUCCEEDED;
 				break;
 				case PS3MAPI_OPCODE_LV2_PEEK:
-					//return lv1_peekd(param2 + 0x1000000ULL);// BadWDSD/OFW only
-					//return lv1_peekd(param2 + 0x8000000ULL);// BadWDSD/qCFW only
 					return *(uint64_t *)param2;
 				break;
-
 				case PS3MAPI_OPCODE_LV2_POKE:
-					//lv1_poked(param2 + 0x1000000ULL, param3);// BadWDSD/OFW only
-					//lv1_poked(param2 + 0x8000000ULL, param3);// BadWDSD/qCFW only
 					if(param2>MKA(hash_checked_area))
 					{
 						*(uint64_t *)param2=param3;
 					}
 					return SUCCEEDED;
 				break;
-
 				//----------
 				//SECURITY
 				//----------
@@ -712,7 +836,6 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 					ps3mapi_access_granted = 0;
 					ps3mapi_access_tries = 0;
 					return 0;
-
 				//----------
 				//PROCESS
 				//----------
@@ -803,7 +926,6 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 				case PS3MAPI_OPCODE_GET_RESTORE_SYSCALLS:
 					return allow_restore_sc;
 				break;
-				
 				//----------
 				//REMOVE HOOK
 				//----------
@@ -1054,7 +1176,7 @@ LV2_SYSCALL2(int64_t, syscall8, (uint64_t function, uint64_t param1, uint64_t pa
 			if (1 <= ps3mapi_partial_disable_syscall8)	return ENOSYS;
 			
 			// Partial support for lv1_peek here
-			//return lv1_peekd(function);// BadWDSD/OFW only
+			return lv1_peekd(function); // BadWDSD/qCFW only
 	}
 
 	#ifdef DEBUG
@@ -1219,6 +1341,8 @@ extern volatile int sleep_done;
 
 int main(void)
 {
+	BadWDSD_TryInstallHvcall();
+
 	// Cleanup Old and Temp HEN Files
 	cleanup_files();
 	
@@ -1448,7 +1572,7 @@ int main(void)
 		//load_boot_plugins();
 		//load_boot_plugins_kernel();
 		load_hen_plugin();
-  
+
 		#ifdef DEBUG
 			//DPRINTF("PAYLOAD->plugins loaded\n");
 		#endif
