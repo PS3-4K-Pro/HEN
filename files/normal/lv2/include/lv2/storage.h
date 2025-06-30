@@ -127,3 +127,4 @@ static INLINE uint64_t storage_get_flash_device(void)
 
 
 #endif /* __LV2_STORAGE_H__ */
+

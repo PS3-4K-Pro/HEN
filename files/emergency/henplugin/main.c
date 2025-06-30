@@ -8,45 +8,61 @@
 #include <sys/timer.h>
 #include <sys/event.h>
 #include <sys/syscall.h>
-//#include <sys/socket.h>
+#include <sys/socket.h>
 #include <sys/memory.h>
-//#include <sys/ss_get_open_psid.h>
+#include <sys/ss_get_open_psid.h>
 
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-//#include <time.h>
+#include <time.h>
 #include <types.h>
 #include "allocator.h"
 #include "common.h"
 #include "stdc.h"
-//#include "download_plugin.h"
-//#include "game_ext_plugin.h"
-//#include "xmb_plugin.h"
+#include "download_plugin.h"
+#include "game_ext_plugin.h"
+#include "xmb_plugin.h"
 
+#include <stdbool.h>
 #include "typew.h"
 #include "vpad.h"
+	  
 #include "xregistry.h"
 //#include "paf.h"
 
-//#include <sys/sys_time.h>
+#include <sys/sys_time.h>
 #include <sys/types.h>
-//#include <sys/socket.h>
+#include <sys/socket.h>
 #include <sys/syscall.h>
-//#include <sys/timer.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
-//#include <netdb.h>
-//#include <netex/net.h>
-//#include <netex/errno.h>
+#include <sys/timer.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netex/net.h>
+#include <netex/errno.h>
 #include <cell/fs/cell_fs_errno.h>
 #include <cell/fs/cell_fs_file_api.h>
 #include <ppu_intrinsics.h>
 #include <cstdlib>
+#pragma comment(lib, "net_stub")
+#pragma comment(lib, "netctl_stub")
 
+#define SERVER_PORT htons(80)
+#define HOST_SERVER "www.ps3xploit.me"
+
+#define RELEASE 0
+#define DEV 1
+
+int build_type = RELEASE;
+int is_open_beta = 0;// Set to 0 for release
+
+int Socket;
+struct hostent *Host;
+struct sockaddr_in SocketAddress;
+char RequestBuffer[512];
 
 SYS_MODULE_INFO(HENPLUGIN, 0, 1, 0);
 SYS_MODULE_START(henplugin_start);
@@ -66,12 +82,16 @@ extern uint32_t vshmain_EB757101(void);        // get running mode flag, 0 = XMB
 #define IS_INGAME		(GetCurrentRunningMode() != 0)
 
 static sys_ppu_thread_t thread_id=-1;
+static int done = 0;
 
-
-
+uint16_t hen_version;
 int henplugin_start(uint64_t arg);
 int henplugin_stop(void);
-
+int is_wmm_installed = 0;
+int is_hen_installing = 0;
+int use_wmm_pkg = 0;
+int usb_emergency_update = 0;
+int hen_restore = 0;
 
 extern int vshmain_87BB0001(int param);
 int (*vshtask_notify)(int, const char *) = NULL;
@@ -79,6 +99,48 @@ int (*vshtask_notify)(int, const char *) = NULL;
 //static int (*vshmain_is_ss_enabled)(void) = NULL;
 static int (*View_Find)(const char *) = NULL;
 static void *(*plugin_GetInterface)(int,int) = NULL;
+
+/*
+static int (*set_SSHT_)(int) = NULL;
+
+static int opd[2] = {0, 0};
+*/
+
+#define IS_INSTALLING		(View_Find("game_plugin") != 0)
+#define IS_INSTALLING_NAS	(View_Find("nas_plugin") != 0)
+#define IS_DOWNLOADING		(View_Find("download_plugin") != 0)
+
+// Debug Log to external device
+#define LOG_FILE_PATH "/dev_usb000/PS3HEN.log"
+void DLOG(const char *format, ...);
+void DLOG(const char *format, ...) {
+    CellFsStat stat;
+    CellFsErrno fsErr;
+    uint64_t written;
+    int fd;
+    char buffer[256];
+
+    fsErr = cellFsStat("/dev_usb000/", &stat);
+    if (fsErr != CELL_FS_SUCCEEDED) {
+        DPRINTF("HENPLUGIN->USB device not found: 0x%08x\n", fsErr);
+        return;
+    }
+
+    fsErr = cellFsOpen(LOG_FILE_PATH, CELL_FS_O_WRONLY | CELL_FS_O_CREAT | CELL_FS_O_APPEND, &fd, NULL, 0);
+    if (fsErr != CELL_FS_SUCCEEDED) {
+        DPRINTF("HENPLUGIN->Failed to open log file: 0x%08x\n", fsErr);
+        return;
+    }
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    cellFsWrite(fd, buffer, strlen(buffer), &written);
+
+    cellFsClose(fd);
+}
 
 // Play RCO Sound
 extern void paf_B93AFE7E(uint32_t plugin, const char *sound, float arg1, int arg2);
@@ -153,6 +215,7 @@ static void * getNIDfunc(const char * vsh_module, uint32_t fnid, int offset)
 	return 0;
 }
 
+// PAD
 #define SC_PAD_SET_DATA_INSERT_MODE		(573)
 #define SC_PAD_REGISTER_CONTROLLER		(574)
 #define BETWEEN(a, b, c)	( ((a) <= (b)) && ((b) <= (c)) )
@@ -409,7 +472,6 @@ static void press_accept_button(void)
 {
 	press_cancel_button(1);
 }
-
 // LV2 Syscalls
 static int sysLv2FsLink(const char *oldpath, const char *newpath)
 {
@@ -423,11 +485,11 @@ static int sysLv2FsMkdir(const char *path, int mode)
     return_to_user_prog(int);
 }
 
-/*static int sysLv2FsRename(const char *from, const char *to)
+static int sysLv2FsRename(const char *from, const char *to)
 {
     system_call_2(812, (uint64_t)(uintptr_t)from, (uint64_t)(uintptr_t)to);
     return_to_user_prog(int);
-}*/
+}
 
 
 /*static int sys_timer_sleep(uint64_t sleep_time)
@@ -512,6 +574,7 @@ static void show_msg(char* msg)
 	vshtask_notify(0, msg);
 
 }
+
 #define process_id_t uint32_t
 #define SYSCALL8_OPCODE_PS3MAPI			 		0x7777
 #define PS3MAPI_OPCODE_GET_ALL_PROC_PID			0x0021
@@ -578,10 +641,38 @@ static int number_users(void)
     return num;
 }
 
+process_id_t vsh_pid=0;
+/*
+static int poke_vsh(uint64_t address, char *buf,int size)
+{
+	if(!vsh_pid)
+	{
+		uint32_t tmp_pid_list[MAX_PROCESS];
+		char name[25];
+		int i;
+		system_call_3(8, SYSCALL8_OPCODE_PS3MAPI,PS3MAPI_OPCODE_GET_ALL_PROC_PID,(uint64_t)(uint32_t)tmp_pid_list);
+		for(i=0;i<MAX_PROCESS;i++)
+		{
+			system_call_4(8, SYSCALL8_OPCODE_PS3MAPI,PS3MAPI_OPCODE_GET_PROC_NAME_BY_PID,tmp_pid_list[i],(uint64_t)(uint32_t)name);
+			if(strstr(name,"vsh"))
+			{
+				vsh_pid=tmp_pid_list[i];
+				break;
+			}
+		}
+		if(!vsh_pid)
+			return -1;
+	}
+	system_call_6(8,SYSCALL8_OPCODE_PS3MAPI,PS3MAPI_OPCODE_SET_PROC_MEM,vsh_pid,address,(uint64_t)(uint32_t)buf,size);
+	return_to_user_prog(int);
+}
+*/
+
 static void enable_ingame_screenshot(void)
 {
 	((int*)getNIDfunc("vshmain",0x981D7E9F,0))[0] -= 0x2C;
 }
+
 /*
 static int sys_map_path(char *old, char *new)
 {
@@ -589,12 +680,14 @@ static int sys_map_path(char *old, char *new)
 	return (int)p1;
 }
 */
+
 static void reload_xmb(void)
 {
 	while(!IS_ON_XMB)
 	{
 		sys_timer_usleep(70000);
 	}
+
 	// Reload to swap HEN icon 
 	explore_interface->ExecXMBcommand("reload_category_items game",0,0);
 	
@@ -622,6 +715,28 @@ static void reload_xmb(void)
 		explore_interface->ExecXMBcommand("reload_category friend",0,0);
 		explore_interface->ExecXMBcommand("reload_category photo",0,0);		
 	}
+	
+	/*
+	char* q=(char*)malloc(89);
+	char* a=(char*)malloc(18);
+	memcpy(q,"xcb://localhost/query?sort=+Game:Common.titleForSort&cond=Oe+Game:Game.titleId RELOADXMB",89);
+	memcpy(a,"Game:Game.titleId",18);
+	q[89]='\0'; // add null termination
+	a[18]='\0'; // add null termination
+	uint8_t output[8]={0,0,0,0,0,0,0,0};
+	int ret=explore_interface->DoUnk11(&q[0],&a[0],&output[0]);
+	if(ret)
+	{
+		printf ("Error 0x%X\n",ret);
+	}
+	else
+	{
+		for(int i=0;i<8;i++)
+		{
+			printf ("Output %i = 0x%X\n", i, output[i]);
+		}
+	}
+	*/
 }
 
 static inline void _sys_ppu_thread_exit(uint64_t val)
@@ -663,12 +778,321 @@ static void stop_prx_module(void)
 
 }
 
+static int LoadPluginById(int id, void *handler)
+{
+	if(xmm0_interface == 0) // getting xmb_plugin xmm0 interface for loading plugin sprx
+	{
+		xmm0_interface = (xmb_plugin_xmm0 *)plugin_GetInterface(View_Find("xmb_plugin"), 0x584d4d30);
+	}
+	return xmm0_interface->LoadPlugin3(id, handler, 0);
+}
+
+static int UnloadPluginById(int id, void *handler)
+{
+	if(xmm0_interface == 0) // getting xmb_plugin xmm0 interface for loading plugin sprx
+	{
+		xmm0_interface = (xmb_plugin_xmm0 *)plugin_GetInterface(View_Find("xmb_plugin"), 0x584d4d30);
+	}
+	return xmm0_interface->Shutdown(id, handler, 1);
+}
+
 #define SYSCALL8_OPCODE_HEN_REV		0x1339
 
+int do_install_hen=0;
+int do_update=0;
+int thread2_download_finish=0;
+int thread3_install_finish=0;
+
+#define SYSCALL_PEEK	6
+
+static uint64_t peekq(uint64_t addr)
+{
+	system_call_1(SYSCALL_PEEK, addr);
+	return_to_user_prog(uint64_t);
+}
+
+char pkg_path[256]={"/dev_hdd0/Latest_HEN_Installer_signed.pkg"};
+char pkg_path_wmm[256]={"/dev_hdd0/Latest_HEN_Installer_WMM_signed.pkg"};
+
+// FW version values are checked using a partial date from lv2 kernel. 4.89 Sample: 323032322F30322F = 2022/02/
+static void downloadPKG_thread2(void)
+{
+	if(download_interface == 0) // test if download_interface is loaded for interface access
+	{
+		download_interface = (download_plugin_interface *)plugin_GetInterface(View_Find("download_plugin"), 1);
+	}
+	show_msg((char *)"Downloading Latest HEN Package");
+	
+	uint64_t val=peekq(0x80000000002FCB68ULL);// CEX
+	uint64_t valD=peekq(0x800000000031F028ULL);// DEX
+	
+	const wchar_t* build_type_path = L"";
+	const wchar_t* fw_version = L"";
+	const wchar_t* kernel_type = L"";
+	const wchar_t* pkg_suffix = L"";
+	const wchar_t* pkg_url_tmp = L"http://www.ps3xploit.me/hen/%ls/%ls/%ls/installer/Latest_HEN_Installer%ls";
+	const wchar_t* pkg_dl_path = L"/dev_hdd0";
+	wchar_t pkg_url[256];
+	
+	if(use_wmm_pkg==1)
+	{
+		pkg_suffix=L"_WMM_signed.pkg";
+	}
+	else
+	{
+		pkg_suffix=L"_signed.pkg";
+	}
+	
+	if(build_type==RELEASE)
+	{
+		build_type_path=L"release";
+	}
+	else
+	{
+		build_type_path=L"dev";
+	}
+	
+	
+	// 4.80 CEX
+	// Kernel offset is off by 0x10 so we are checking this value instead of the timestamp
+	if(val==0x3A32350000000000ULL)
+	{
+		fw_version = L"480";
+		kernel_type = L"cex";
+	}
+	
+	// 4.81 CEX
+	else if(val==0x323031362F31302FULL)
+	{
+		fw_version = L"481";
+		kernel_type = L"cex";
+	}
+	
+	// 4.82 CEX
+	else if(val==0x323031372F30382FULL)
+	{
+		fw_version = L"482";
+		kernel_type = L"cex";
+	}
+		
+	// 4.83 CEX
+	else if(val==0x323031382F30392FULL)
+	{
+		fw_version = L"483";
+		kernel_type = L"cex";
+	}
+		
+	// 4.84 CEX
+	else if(val==0x323031392F30312FULL)
+	{
+		fw_version = L"484";
+		kernel_type = L"cex";
+	}
+		
+	// 4.85 CEX
+	else if(val==0x323031392F30372FULL)
+	{
+		fw_version = L"485";
+		kernel_type = L"cex";
+	}
+		
+	// 4.86 CEX
+	else if(val==0x323032302F30312FULL)
+	{
+		fw_version = L"486";
+		kernel_type = L"cex";
+	}
+		
+	// 4.87 CEX
+	else if(val==0x323032302F30372FULL)
+	{
+		fw_version = L"487";
+		kernel_type = L"cex";
+	}
+		
+	// 4.88 CEX
+	else if(val==0x323032312F30342FULL)
+	{
+		fw_version = L"488";
+		kernel_type = L"cex";
+	}
+		
+	// 4.89 CEX
+	else if(val==0x323032322F30322FULL)
+	{
+		fw_version = L"489";
+		kernel_type = L"cex";
+	}
+		
+	// 4.90 CEX
+	// Kernel offset is off by 0x10 so we are checking this value instead of the timestamp
+	else if(val==0x3A35340000000000ULL)
+	{
+		fw_version = L"490";
+		kernel_type = L"cex";
+	}
+		
+	// 4.91 CEX
+	else if(val==0x323032332F31322FULL)
+	{
+		fw_version = L"491";
+		kernel_type = L"cex";
+	}
+		
+	// 4.92 CEX
+	else if(val==0x323032352F30322FULL)
+	{
+		fw_version = L"492";
+		kernel_type = L"cex";
+	}
+
+	// 4.82 DEX
+	else if(valD==0x323031372F30382FULL)
+	{
+		fw_version = L"482";
+		kernel_type = L"dex";
+	}
+		
+	// 4.84 DEX
+	else if(valD==0x323031392F30312FULL)
+	{
+		fw_version = L"484";
+		kernel_type = L"dex";
+	}
+		
+	//DPRINTF("HENPLUGIN->build_type_path: %ls\n",(char*)build_type_path);
+	//DPRINTF("HENPLUGIN->pkg_url_tmp: %ls\n",(char*)pkg_url_tmp);
+	//DPRINTF("HENPLUGIN->pkg_dl_path: %ls\n",(char*)pkg_dl_path);
+	//DPRINTF("HENPLUGIN->fw_version: %ls\n",(char*)fw_version);
+	//DPRINTF("HENPLUGIN->kernel_type: %ls\n",(char*)kernel_type);
+	//DPRINTF("HENPLUGIN->pkg_suffix: %ls\n",(char*)pkg_suffix);
+	
+	swprintf(pkg_url, sizeof(pkg_url), pkg_url_tmp, build_type_path, fw_version, kernel_type, pkg_suffix);
+	DPRINTF("HENPLUGIN->pkg_url: %ls\n",(char*)pkg_url);
+	download_interface->DownloadURL(0, pkg_url, (wchar_t*)pkg_dl_path);
+	
+	thread2_download_finish=1;
+}
+
+
+static void installPKG_thread(void)
+{
+	if(game_ext_interface == 0) // test if game_ext_plugin is loaded for interface access
+	{
+		game_ext_interface = (game_ext_plugin_interface *)plugin_GetInterface(View_Find("game_ext_plugin"), 1);
+		if(game_ext_interface == 0) return;
+	}
+
+	game_ext_interface->LoadPage();
+	game_ext_interface->installPKG((char *)pkg_path);
+	thread3_install_finish=1;
+}
+
+static void unloadSysPluginCallback(void)
+{
+	//Add potential callback process
+	//show_msg((char *)"plugin shutdown via xmb call launched");
+	DPRINTF("HENPLUGIN->plugin shutdown via xmb call launched");
+}
+
+static void unload_web_plugins(void)
+{
+
+	while(View_Find("webrender_plugin"))
+	{
+		UnloadPluginById(0x1C, (void *)unloadSysPluginCallback);
+		sys_timer_usleep(70000);
+	}
+
+	while(View_Find("webbrowser_plugin"))
+	{
+		UnloadPluginById(0x1B, (void *)unloadSysPluginCallback);
+		sys_timer_usleep(70000);
+	}
+
+	explore_interface->ExecXMBcommand("close_all_list", 0, 0);
+}
+
+char server_reply[0x500];
+
+int hen_updater(void);
+int hen_updater(void)
+{
+	uint16_t latest_rev=0;
+	Host = gethostbyname(HOST_SERVER);
+	if(!Host)
+	{
+		show_msg((char *)"Could not resolve update Host!\n");
+		return -1;
+	}
+    SocketAddress.sin_addr.s_addr = *((unsigned long*)Host->h_addr);
+    SocketAddress.sin_family = AF_INET;
+    SocketAddress.sin_port = SERVER_PORT;
+    Socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (connect(Socket, (struct sockaddr *)&SocketAddress, sizeof(SocketAddress)) != 0) {
+		show_msg((char *)"Failed To Connect To Update Server!");
+        return -1;
+    }
+
+	strcpy(RequestBuffer, "GET ");
+    if(build_type==RELEASE){strcat(RequestBuffer, "/hen/hen_version.bin");}
+    if(build_type==DEV){strcat(RequestBuffer, "/hen/hen_version_dev.bin");}
+    strcat(RequestBuffer, " HTTP/1.0\r\n");
+	strcat(RequestBuffer, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134\r\n");
+    strcat(RequestBuffer, "Accept-Language: en-US\r\n");
+    strcat(RequestBuffer, "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n");
+    strcat(RequestBuffer, "Upgrade-Insecure-Requests: 1\r\n");
+    strcat(RequestBuffer, "HOST: "HOST_SERVER"\r\n");
+    strcat(RequestBuffer, "Connection: close\r\n");
+    strcat(RequestBuffer, "\r\n");
+    send(Socket, RequestBuffer, strlen(RequestBuffer), 0);
+
+	int reply_len=0;
+	int allowed_length=sizeof(server_reply);
+    while (1)
+    {
+		int reply_len1=recv(Socket, &server_reply[reply_len], allowed_length, 0);
+		if(reply_len1>0)
+		{
+			reply_len+=reply_len1;
+			allowed_length-=reply_len1;
+		}
+		else
+		{
+			break;
+		}
+    }
+	socketclose(Socket);
+	if(reply_len<=6)
+	{
+		show_msg((char *)"Error on update server!");
+		return 0;
+	}
+
+	if(strstr(server_reply,"200 OK"))
+	{
+		latest_rev=*(uint16_t *)(server_reply+reply_len-2);
+	}
+	else
+	{
+		show_msg((char *)"Update Server Responded With Error!");
+		return 0;
+	}
+
+	char msg[100];
+	sprintf(msg,"Latest PS3HEN available is %X.%X.%X",latest_rev>>8, (latest_rev & 0xF0)>>4, (latest_rev&0xF));
+	show_msg((char*)msg);
+	if(hen_version<latest_rev)
+	{
+		return 1;
+	}
+	return 0;
+}
 
 // Toggles can be accessed by HFW Tools menu
 // Clear Browser and PSN Cache (thanks xfrcc for original idea)
 // Clear PSN cache (thanks LuanTeles)
+
 void clear_web_cache_check(void);
 void clear_web_cache_check(void) {
     DPRINTF("HENPLUGIN->Clear Web Cache Check Started\n");
@@ -684,7 +1108,7 @@ void clear_web_cache_check(void) {
         "/dev_hdd0/home/%08i/community/PTL.TMP"
     };
     const char* toggles[] = {
-        "/dev_flash/hen/toggles/clear_web_history.on",
+		"/dev_flash/hen/toggles/clear_web_history.on",
         "/dev_flash/hen/toggles/clear_web_auth_cache.on",
         "/dev_flash/hen/toggles/clear_web_cookie.on",
         "/dev_flash/hen/toggles/clear_system_information.on",
@@ -728,6 +1152,34 @@ void clear_web_cache_check(void) {
     } else {
         DPRINTF("HENPLUGIN->No Clear Web Cache Toggles Activated\n");
     }
+}
+
+void set_build_type(void);
+void set_build_type(void)
+{
+    CellFsStat stat;
+
+    // Check the internal HDD path first
+    if (cellFsStat("/dev_flash/hen/toggles/dev_build_type.on", &stat) == 0) {
+        build_type = DEV;
+        DPRINTF("HENPLUGIN->Found dev_build_type.on at /dev_hdd0/hen/toggles/\n");
+    } else {
+        // Loop through USB paths 000 to 007
+        for (int i = 0; i < 8; i++) {
+            char usb_path[32];
+            snprintf(usb_path, sizeof(usb_path), "/dev_usb00%d/dev_build_type.on", i);
+            
+            if (cellFsStat(usb_path, &stat) == 0) {
+                build_type = DEV;
+                DPRINTF("HENPLUGIN->Found dev_build_type.on at %s\n", usb_path);
+                break;
+            } else {
+                DPRINTF("HENPLUGIN->Checking for dev_build_type.on at %s\n", usb_path);
+            }
+        }
+    }
+
+    DPRINTF("HENPLUGIN->Setting build_type to %i\n", build_type);
 }
 
 // Restore act.dat (thanks bucanero)
@@ -787,6 +1239,62 @@ static void play_rco_sound(const char *sound)
 	{
 		PlayRCOSound(plugin, sound, 1, 0);
 		DPRINTF("HENPLUGIN->PlayRCOSound(%0X, %s, 1, 0)\n",plugin,sound);
+	}
+}
+
+static void close_browser_plugins(void);
+static void close_browser_plugins(void)
+{
+	View_Find = getNIDfunc("paf", 0xF21655F3, 0);
+	int is_browser_open=View_Find("webbrowser_plugin");
+	
+	// Silk
+	DPRINTF("HENPLUGIN->close_browser_plugins: silk \n");
+	while(is_browser_open)
+	{	
+		sys_timer_usleep(70000);
+		is_browser_open=View_Find("webbrowser_plugin");
+	}
+	
+	// Webkit
+	DPRINTF("HENPLUGIN->close_browser_plugins: webkit \n");
+	is_browser_open=View_Find("webrender_plugin");
+	while(is_browser_open)
+	{
+		sys_timer_usleep(70000);
+		is_browser_open=View_Find("webrender_plugin");
+	}
+	DPRINTF("HENPLUGIN->unload_web_plugins \n");
+	unload_web_plugins();
+}
+
+static void package_install(void);
+static void package_install(void)
+{
+	DPRINTF("HENPLUGIN->package_install: %s \n", pkg_path);
+	CellFsStat stat;
+	
+	LoadPluginById(0x16, (void *)installPKG_thread);
+	
+	if(cellFsStat(pkg_path,&stat)==0)
+	{
+		if (usb_emergency_update==1)
+		{
+			char manual_reboot_txt[0x80];
+			sprintf(manual_reboot_txt, "HENPLUS_UPD.PKG installing from USB.\nWhen finished, reboot manually.");
+			show_msg((char *)manual_reboot_txt);
+		}
+		else 
+		{
+			// Original logic for waiting for package installation to complete
+			DPRINTF("HENPLUGIN->IS_INSTALLING: %08X\nthread3_install_finish: %i\n",IS_INSTALLING,thread3_install_finish);
+			while (!thread3_install_finish || IS_INSTALLING)
+			{
+				DPRINTF("HENPLUGIN->IS_INSTALLING: %08X\n",IS_INSTALLING);
+				sys_timer_usleep(2000000); // check every 2 seconds
+			}
+			reboot_flag=1;
+		}
 	}
 }
 
@@ -1162,19 +1670,6 @@ static void copy_files_symbolic(void)
 }
 */
 
-static void check_files(void)
-{
-		copy_files();
-		
-		sys_timer_usleep(5000000);
-		set_led("install_success");
-		play_rco_sound("snd_system_ok");
-		
-		char plugins_txt[0x80];
-		sprintf(plugins_txt, "Plugins redefined!");
-		show_msg((char *)plugins_txt);
-}
-
 static void check_badwdsd(void);
 static void check_badwdsd(void)
 {
@@ -1230,36 +1725,224 @@ static void show_notification(void)
 			BEEP3;
 		}
 		
-		show_msg((char *)welcome_notification); 
-		
+		show_msg((char *)welcome_notification);
+
 	}
 }
 
 static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 {
+	set_build_type();
 	
 	View_Find = getNIDfunc("paf", 0xF21655F3, 0);
 	plugin_GetInterface = getNIDfunc("paf", 0x23AFB290, 0);
 	int view = View_Find("explore_plugin");
+	
+	/*
+	// Welcome message
+	system_call_1(8, SYSCALL8_OPCODE_HEN_REV); hen_version = (int)p1;
+	char henver[0x40];
+	
+	if(is_open_beta)
+	{
+		sprintf(henver, "Welcome to PS3HEN %X.%X.%X\nOpen Beta", hen_version>>8, (hen_version & 0xF0)>>4, (hen_version&0xF));
+	}
+	else
+	{
+		if(build_type==DEV)
+		{
+			sprintf(henver, "Welcome to PS3HEN %X.%X.%X\nDeveloper Mode", hen_version>>8, (hen_version & 0xF0)>>4, (hen_version&0xF));
+		}
+		else
+		{
+			sprintf(henver, "Welcome to PS3HEN %X.%X.%X", hen_version>>8, (hen_version & 0xF0)>>4, (hen_version&0xF));
+		}
+	}
+	
+	DPRINTF("HENPLUGIN->hen_version: %x\n",hen_version);
+	show_msg((char *)henver);
+	
+	*/
+
 	if(view==0)
 	{
 		view=View_Find("explore_plugin");
 		sys_timer_usleep(70000);
 	}
 	explore_interface = (explore_plugin_interface *)plugin_GetInterface(view, 1);
-	
+
 	enable_ingame_screenshot();
 	reload_xmb();
-	delete_folders();
-	copy_fps_counter();
-	check_files();
-	check_xmb_files();
+	
+	// Check for BadWDSD exploit
 	check_badwdsd();
+
+	CellFsStat stat;
+
+	// Emergency USB HEN Installer
+	for (int i = 0; i < 8; i++) {
+		char usb_path[32];
+		snprintf(usb_path, sizeof(usb_path), "/dev_usb00%d/HENPLUS_UPD.pkg", i);
+
+		// Check if the package exists on the current USB path
+		if (cellFsStat(usb_path, &stat) == 0) {
+			DPRINTF("HENPLUGIN->Checking for emergency installer on %s\n", usb_path);
+			
+			usb_emergency_update = 1;  // Set USB Emergency Update Flag
+			//set_led("install_start");
+			play_rco_sound("snd_trophy");
+			DPRINTF("HENPLUGIN->Installing Emergency Package From %s\n", usb_path);
+			
+			// Set pkg_path to the found USB path
+			memset(pkg_path, 0, 256);
+			strcpy(pkg_path, usb_path);
+			
+			close_browser_plugins();
+			package_install();
+			
+			//sys_timer_usleep(20000000); // wait 20 seconds to allow package to finish
+			//set_led("install_success");
+			
+			goto done;
+		} else {
+			DPRINTF("HENPLUGIN->Checking for emergency installer on %s\n", usb_path);
+		}
+	}
+
+	delete_folders(); //Delete What's new cache
+	copy_fps_counter(); //Avoid comflict with webMAN updater
+	check_xmb_files();
+	copy_files();
 	//copy_files_symbolic();
+	
+	// Create default directories for BDISO, PSXISO, PS2ISO, PS3ISO, PSPISO, etc
 	create_default_dirs();
+	
+	// restore act.dat from act.bak backup
 	restore_act_dat();
-	clear_web_cache_check();
-	show_notification();
+	
+	// If default HEN Check file is missing, assume HEN is not installed
+	do_install_hen=(cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat));
+	//DPRINTF("HENPLUGIN->do_install_hen: %x\n",do_install_hen);
+	
+	// Default restore option check for use if HDD formatted game folder missing (3.3.1+)
+	hen_restore=(cellFsStat("/dev_hdd0/game/PS3XPLOIT/USRDIR/hen.installed",&stat));
+	DPRINTF("HENPLUGIN->hen_restore: %x\n",hen_restore);
+	
+	// Check for webMAN-MOD
+	if((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0))
+	{
+		is_wmm_installed=1;
+		DPRINTF("HENPLUGIN->WMM Detected\n");
+	}
+	
+	// Display message about the temporary disabling of boot plugins
+	// Created from payload if HEN is installing, so plugins cannot be loaded
+	if(cellFsStat("/dev_hdd0/tmp/installer.active",&stat)==0)
+	{
+		is_hen_installing=1;
+		//play_rco_sound("snd_trophy");
+		char msg_boot_plugins[0x80];
+		sprintf(msg_boot_plugins, "Boot Plugins Text Have Been\nTemporarily Disabled Until Next Reboot!");
+		show_msg((char *)msg_boot_plugins);
+		cellFsUnlink("/dev_hdd0/tmp/installer.active");
+	}
+	
+	//	do_update=(cellFsStat("/dev_flash/hen/toggles/hen_updater.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
+	do_update=0
+	
+	//DPRINTF("HENPLUGIN->Checking do_update: %i\n",do_update);
+	
+	// Removing temp installer packages so old ones can't be installed
+	DPRINTF("HENPLUGIN->Removing any leftover temp installer packages\n");
+	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_signed.pkg");
+	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_WMM_signed.pkg");
+	
+	if((do_install_hen!=0) || (do_update==1) || hen_restore!=0)
+	{
+		set_led("install_start");
+		close_browser_plugins();
+		
+		// Check for Webman-MOD and use PS3HEN-WMM Package Link
+		if((is_wmm_installed==1) && (is_hen_installing==1) && (build_type==!DEV))
+		{
+			DPRINTF("HENPLUGIN->Use WMM Update Package\n");
+			memset(pkg_path,0,256);
+			strcpy(pkg_path,pkg_path_wmm);
+			use_wmm_pkg=1;
+		}
+		
+		DPRINTF("HENPLUGIN->pkg_path=%s\n",pkg_path);
+	
+		LoadPluginById(0x29,(void*)downloadPKG_thread2);
+
+		while(thread2_download_finish==0)
+		{
+			sys_timer_usleep(70000);
+		}
+
+		while(IS_DOWNLOADING)
+		{
+			sys_timer_usleep(500000);
+			//DPRINTF("HENPLUGIN->Waiting for package to finish downloading\n");
+		}
+		
+		package_install();
+			
+		goto done;
+	}
+	else
+	{   
+		// Removing temp packages
+		//cellFsUnlink(pkg_path);
+		//cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_signed.pkg");
+		//cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_WMM_signed.pkg");
+	}
+	
+done:
+
+	// Restore boot_plugins files
+	if(is_hen_installing==1)
+	{
+		DPRINTF("HENPLUGIN->Restoring boot plugin files\n");
+		if(cellFsStat("/dev_hdd0/boot_plugins.hen",&stat)==0)
+		{
+			sysLv2FsRename("/dev_hdd0/boot_plugins.hen", "/dev_hdd0/boot_plugins.txt");
+		}
+
+		if(cellFsStat("/dev_hdd0/boot_plugins_kernel.hen",&stat)==0)
+		{
+			sysLv2FsRename("/dev_hdd0/boot_plugins_kernel.hen", "/dev_hdd0/boot_plugins_kernel.txt");
+		}
+	}
+	
+	DPRINTF("HENPLUGIN->Removing temp files\n");
+	cellFsUnlink("/dev_hdd0/theme/PS3HEN.p3t");// Removing temp HEN installer
+	cellFsUnlink("/dev_hdd0/HENplugin.sprx");// Removing temp HEN Plugin SPRX
+	
+	done=1;
+	
+	DPRINTF("HENPLUGIN->Done! Preparing to exit thread\n");	
+	
+	if(reboot_flag==1)
+	{	
+		DPRINTF("HENPLUGIN->Reboot flag is active\n");
+		
+		set_led("install_success");
+		play_rco_sound("snd_trophy");
+		
+		char reboot_txt[0x80];
+		sprintf(reboot_txt, "Installation Complete!\n\nPrepare For Reboot...");
+		show_msg((char *)reboot_txt);
+		sys_timer_usleep(10000000);// Wait a few seconds
+		reboot_ps3();// Default Soft Reboot
+	}
+	
+	clear_web_cache_check();// Clear WebBrowser cache check (thanks xfrcc)
+	
+	show_notification(); // Show PS3 4K Pro variant info
+	
+	DPRINTF("HENPLUGIN->Exiting main thread!\n");	
 	
 	sys_ppu_thread_exit(0);
 }

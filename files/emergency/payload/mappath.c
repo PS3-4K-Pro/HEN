@@ -860,15 +860,7 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 		make_rif(path0);
 		restore_syscalls(path0);
 		check_signin(path0);
-
-		if (block_psp_launcher && !umd_file && !strncmp(path0, "/dev_flash/pspemu", 17))
-		{
-			block_psp_launcher = 0;
-			set_patched_func_param(1, (uint64_t)no_exists);
-			unlock_mtx(&oph_mtx);
-			return 0;
-		}
-
+		
 		// Let's now block homebrews if the "allow" flag is false
 		if(!block_homebrew(path0))
 				{
@@ -923,7 +915,7 @@ LV2_HOOKED_FUNCTION_POSTCALL_2(int, open_path_hook, (char *path0, char *path1))
 						else if(!strcmp(photo + len -4, ".PNG") || !strcmp(photo + len -4, ".JPG") || !strcmp(photo + len -8, "_COV.JPG") || !strncasecmp(photo + len -8, ".iso.jpg", 8) || !strncasecmp(photo + len -8, ".iso.png", 8))
 						{
 							#ifdef DEBUG
-								//DPRINTF("open_path_hook:= CREATING /dev_hdd0/tmp/wm_request\n");
+								DPRINTF("open_path_hook:= CREATING /dev_hdd0/tmp/wm_request\n");
 							#endif
 							int fd;
 							if(cellFsOpen("/dev_hdd0/tmp/wm_request", CELL_FS_O_CREAT | CELL_FS_O_WRONLY | CELL_FS_O_TRUNC, &fd, 0666, NULL, 0) == 0)

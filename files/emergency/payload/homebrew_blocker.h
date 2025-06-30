@@ -5,8 +5,6 @@
 #define NPSIGNIN_UNLOCK 		"/dev_flash/vsh/resource/npsignin_plugin.rco"
 
 extern uint8_t allow_restore_sc; // allow re-create cfw syscalls accessing system update on XMB
-extern char *umd_file;
-extern uint8_t block_psp_launcher;
 
 int block_homebrew(const char *path);
 void restore_syscalls(const char *path);
