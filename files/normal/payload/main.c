@@ -1696,7 +1696,6 @@ int main(void)
 				map_path("/dev_hdd0/hen/category_restore_system_files.xml","/dev_flash/vsh/resource/explore/xmb/category_restore_system_files.xml",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
 		}
-
 	#ifdef DEBUG
 		printMappingList();
 		//DPRINTF("sys_map_path offset 0x%8lx\n",(uint64_t)(uint64_t*)sys_map_path);

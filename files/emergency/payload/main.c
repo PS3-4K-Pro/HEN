@@ -1715,7 +1715,6 @@ int main(void)
 			}
 		}
 
-
 	#ifdef DEBUG
 		printMappingList();
 		//DPRINTF("sys_map_path offset 0x%8lx\n",(uint64_t)(uint64_t*)sys_map_path);

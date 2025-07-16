@@ -121,7 +121,7 @@ int block_homebrew(const char *path)
 			return allow;
 		}
 
-		// CFW2OFW fix by Evilnat						
+		// CFW2OFW fix by Evilnat
 		if(strstr(path, "/LIC.EDAT"))
 			CFW2OFW_game = 1;
 

@@ -420,7 +420,7 @@ void make_rif(const char *path)
 					{
 						#ifdef DEBUG
 							DPRINTF("Exit make_rif(): Found act.dat in %08d\n", i);
-						#endif */
+						#endif
 
 						return; // exit make_rif() -> the act.dat from another user account will be used
 					}
