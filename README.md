@@ -37,58 +37,58 @@ A exploit that allows the console to run unsigned code.<br>
  
 # v3.5.1
 ### Payload: 
--Added: BadWDSD support.
--Added: ISO Decrypt on-the-fly.
+-Added: BadWDSD support.<br>
+-Added: ISO Decrypt on-the-fly.<br>
 
 # v3.5.0
 ### Plugins:
--Added: Check for map_path to avoid kernel panic if destination file is missing.
--Added: Automatic XMB™ reload if more than one user exists.
+-Added: Check for map_path to avoid kernel panic if destination file is missing.<br>
+-Added: Automatic XMB™ reload if more than one user exists.<br>
 
 ### Payload:
--Added: Ability to restore syscalls.
--Added: PSN™ Blocker (PSN™ Access is blocked if syscalls are enabled).
+-Added: Ability to restore syscalls.<br>
+-Added: PSN™ Blocker (PSN™ Access is blocked if syscalls are enabled).<br>
 
 # v3.4.0
 ### Plugin:
--Added: DLOG function for output to usb000. (Developers Only)
--Added: HEN restore functionality for new package that supports HEN surviving an HDD reformat.
--Added: Cleaning PSN™ files.
--Added: Create_default_dirs function for creating standard folders if missing on dev_hdd0.
--Improved: Cleaned up clear_web_cache_check function.
--Improved: Updated emergency installer to check USB ports 000 - 007 (HEN_UPD.pkg from USB)
+-Added: DLOG function for output to usb000. (Developers Only)<br>
+-Added: HEN restore functionality for new package that supports HEN surviving an HDD reformat.<br>
+-Added: Cleaning PSN™ files.<br>
+-Added: Create_default_dirs function for creating standard folders if missing on dev_hdd0.<br>
+-Improved: Cleaned up clear_web_cache_check function.<br>
+-Improved: Updated emergency installer to check USB ports 000 - 007. (HEN_UPD.pkg from USB)<br>
 -Improved: Updated functions for LED presets.
--Improved: Updated set_build_type function to check USB ports 000 - 007 (For Developer Mode)
+-Improved: Updated set_build_type function to check USB ports 000 - 007. (For Developer Mode)<br>
 
 ### Payload:
--Added: Support for rap.bin. It looks for /dev_hdd0/game/PS3XPLOIT/USRDIR/rap.bin when the make_rif function runs.
--Added: cellFsRename_symbol.
--Improved: Changes made to make_rif functionality for better performance.
--Improved: Now renaming boot plugin files temporarily, instead of deleting them if WMM is found during installation.
--Improved: Updated cellFsMkdir_symbol offsets.
--Added: Implemented optimized read rap.bin functionality.
+-Added: Support for rap.bin. It looks for /dev_hdd0/game/PS3XPLOIT/USRDIR/rap.bin when the make_rif function runs.<br>
+-Added: cellFsRename_symbol.<br>
+-Improved: Changes made to make_rif functionality for better performance.<br>
+-Improved: Now renaming boot plugin files temporarily, instead of deleting them if WMM is found during installation.<br>
+-Improved: Updated cellFsMkdir_symbol offsets.<br>
+-Added: Implemented optimized read rap.bin functionality.<br>
 
 ### Resources:
--Added: New custom coldboot RAF files for release, debug, usb, and DEX.
--Added: PlayStation®Home link installer/launcher under PSN™ category.
--Fixed: seg_mcutility entry in category_game.xml. (Fixes issue with PS1™/PS2™ virtual memory card menu item)
--Improved: Using PS3XPLOIT game directory to add HEN install status to gamedata db, for surviving HDD format. (Hidden from XMB™)
+-Added: New custom coldboot RAF files for release, debug, usb, and DEX.<br>
+-Added: PlayStation®Home link installer/launcher under PSN™ category.<br>
+-Fixed: seg_mcutility entry in category_game.xml. (Fixes issue with PS1™/PS2™ virtual memory card menu item)<br>
+-Improved: Using PS3XPLOIT game directory to add HEN install status to gamedata db, for surviving HDD format. (Hidden from XMB™)<br>
 
 # v3.3.0
 ### Global:
--Added: Support for 4.91 CEX firmware.
+-Added: Support for 4.91 CEX firmware.<br>
 
 ### Plugin:
--Fixed: Early reboot problem with HEN_UPD.PKG for emergency USB recovery.
+-Fixed: Early reboot problem with HEN_UPD.PKG for emergency USB recovery.<br>
 
 ### Payload:
--Fixed: Issue with PSP™ Launcher.
+-Fixed: Issue with PSP™ Launcher.<br>
 
 ### Resources:
--Added: Support for PlayStation®Home Catalogue path in download_list.xml.
--Added: Support for dev_usb002 - dev_usb007 in package manager.
--Added: Toggle 99% package install/delete option in HFW Tools > Maintenance.
--Improved: Updated download_list.xml to use updated paths on dev_hdd0.
+-Added: Support for PlayStation®Home Catalogue path in download_list.xml.<br>
+-Added: Support for dev_usb002 - dev_usb007 in package manager.<br>
+-Added: Toggle 99% package install/delete option in HFW Tools > Maintenance.<br>
+-Improved: Updated download_list.xml to use updated paths on dev_hdd0.<br>
 
 # v3.2.0
 ### Plugin:
