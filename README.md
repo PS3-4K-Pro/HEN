@@ -40,7 +40,7 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: BadWDSD support.<br>
 -Added: ISO Decrypt on-the-fly.<br>
 
-# v3.5.0
+# v3.5.0 (Exclusive)
 ### Plugins:
 -Added: Check for map_path to avoid kernel panic if destination file is missing.<br>
 -Added: Automatic XMB™ reload if more than one user exists.<br>
@@ -50,6 +50,8 @@ A exploit that allows the console to run unsigned code.<br>
 -Added: PSN™ Blocker (PSN™ Access is blocked if syscalls are enabled).<br>
 
 # v3.4.0
+### Global:
+-Added: Support for Firmware 4.92.<br>
 ### Plugin:
 -Added: DLOG function for output to usb000. (Developers Only)<br>
 -Added: HEN restore functionality for new package that supports HEN surviving an HDD reformat.<br>
