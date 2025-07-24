@@ -1911,11 +1911,11 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	restore_act_dat();
 	
 	// If default HEN Check file is missing, assume HEN is not installed
-	do_install_hen=(cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat));
+		//do_install_hen=(cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat));
 	//DPRINTF("HENPLUGIN->do_install_hen: %x\n",do_install_hen);
 	
 	// Default restore option check for use if HDD formatted game folder missing (3.3.1+)
-	hen_restore=(cellFsStat("/dev_hdd0/game/PS3XPLOIT/USRDIR/hen.installed",&stat));
+		//hen_restore=(cellFsStat("/dev_hdd0/game/PS3XPLOIT/USRDIR/hen.installed",&stat));
 	DPRINTF("HENPLUGIN->hen_restore: %x\n",hen_restore);
 	
 	// Check for webMAN-MOD
@@ -1938,7 +1938,6 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	}
 	
 	//	do_update=(cellFsStat("/dev_flash/hen/toggles/hen_updater.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
-	do_update=0
 	
 	//DPRINTF("HENPLUGIN->Checking do_update: %i\n",do_update);
 	
