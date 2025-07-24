@@ -33,9 +33,9 @@ HEN_GEN HENPLUS.BIN_CEX_488 stage2.bin_488C stage0.bin_488C HENplugin.sprx
 HEN_GEN HENPLUS.BIN_CEX_489 stage2.bin_489C stage0.bin_489C HENplugin.sprx
 HEN_GEN HENPLUS.BIN_CEX_490 stage2.bin_490C stage0.bin_490C HENplugin.sprx
 HEN_GEN HENPLUS.BIN_CEX_491 stage2.bin_491C stage0.bin_491C HENplugin.sprx
-HEN_GEN HENPLUS.BIN_CEX_492 stage2.bin_492C stage0.bin_492C HENplugin.sprx																	 
+HEN_GEN HENPLUS.BIN_CEX_492 stage2.bin_492C stage0.bin_492C HENplugin.sprx
 rm stage* *.sprx *.exe
-mv HENPLUS* ../
+mv PS3HEN* ../
 
 :: Not used. Delete these after being created for release version
 rm ../stage0.bin_482D

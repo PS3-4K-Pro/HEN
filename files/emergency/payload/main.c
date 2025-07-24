@@ -1702,13 +1702,14 @@ int main(void)
 				map_path("/dev_flash/vsh/module/download_plugin.sprx","/dev_flash/vsh/resource/AAA/download_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
 
-			// Unlocks the "System Update via Internet" option only when WebMAN ps3-updatelist.txt is redirected.
+			/* Unlocks the "System Update via Internet" option only when WebMAN ps3-updatelist.txt is redirected. (Not needed as webMAN not run on this mode and enabling it will allow OFW update).
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.rco",&stat)==0) && (cellFsStat("/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",&stat)==0) && (cellFsStat("/dev_hdd0/ps3-updatelist.txt",&stat)==0) && (cellFsStat("/dev_hdd0/boot_plugins.txt",&stat)==0) && ((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0)))
 			{
 				map_path("/dev_flash/vsh/resource/software_update_plugin.rco","/dev_flash/vsh/resource/AAA/software_update_plugin.rco",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 				map_path("/dev_flash/vsh/module/software_update_plugin.sprx","/dev_flash/vsh/resource/AAA/software_update_plugin.sprx",FLAG_MAX_PRIORITY|FLAG_PROTECT);
 			}
-
+			*/
+			
 			// Enables automatic GTE widescreen patches on PS1 games.
 			if((cellFsStat("/dev_flash/vsh/resource/AAA/ps1_emu.self",&stat)==0)&& (cellFsStat("/dev_flash/vsh/resource/AAA/ps1_netemu.self",&stat)==0))
 			{

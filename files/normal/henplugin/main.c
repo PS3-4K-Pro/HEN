@@ -1394,7 +1394,7 @@ static void copy_fps_counter(void)
 {
  CellFsStat stat;
 	
-	if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0))			   
+	if((cellFsStat("/dev_flash/vsh/resource/explore/xmb/pro.xml",&stat)==0))
 	{
 		//webMAN
 		cellFsUnlink("/dev_hdd0/tmp/wm_res/VshFpsCounter.sprx");
@@ -1866,7 +1866,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	// Check for BadWDSD exploit
 	check_badwdsd();
 
-	CellFsStat stat;
+	//CellFsStat stat;
 
 	/* Emergency USB HEN Installer
 	for (int i = 0; i < 8; i++) {
@@ -1939,12 +1939,11 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	}
 */	
 	//	do_update=(cellFsStat("/dev_flash/hen/toggles/hen_updater.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
-	do_update=0
-	
+		
 	//DPRINTF("HENPLUGIN->Checking do_update: %i\n",do_update);
 	
 	// Removing temp installer packages so old ones can't be installed
-	DPRINTF("HENPLUGIN->Removing any leftover temp installer packages\n");
+	//DPRINTF("HENPLUGIN->Removing any leftover temp installer packages\n");
 	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_signed.pkg");
 	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_WMM_signed.pkg");
 	
@@ -2010,7 +2009,7 @@ done:
 	cellFsUnlink("/dev_hdd0/theme/PS3HEN.p3t");// Removing temp HEN installer
 	cellFsUnlink("/dev_hdd0/HENplugin.sprx");// Removing temp HEN Plugin SPRX
 	
-	done=1;
+done=1;
 	
 	DPRINTF("HENPLUGIN->Done! Preparing to exit thread\n");	
 	
@@ -2026,8 +2025,9 @@ done:
 		show_msg((char *)reboot_txt);
 		sys_timer_usleep(10000000);// Wait a few seconds
 		reboot_ps3();// Default Soft Reboot
-	}
+	} 
 */
+
 	clear_web_cache_check();// Clear WebBrowser cache check (thanks xfrcc)
 	
 	show_notification(); // Show PS3 4K Pro variant info
