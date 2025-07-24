@@ -1779,7 +1779,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 
 	CellFsStat stat;
 
-	// Emergency USB HEN Installer
+	/* Emergency USB HEN Installer
 	for (int i = 0; i < 8; i++) {
 		char usb_path[32];
 		snprintf(usb_path, sizeof(usb_path), "/dev_usb00%d/HENPLUS_UPD.pkg", i);
@@ -1808,6 +1808,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 			DPRINTF("HENPLUGIN->Checking for emergency installer on %s\n", usb_path);
 		}
 	}
+	*/
 
 	delete_folders(); //Delete What's new cache
 	copy_fps_counter(); //Avoid comflict with webMAN updater
@@ -1822,20 +1823,20 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	restore_act_dat();
 	
 	// If default HEN Check file is missing, assume HEN is not installed
-	do_install_hen=(cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat));
+	//do_install_hen=(cellFsStat("/dev_flash/vsh/resource/explore/icon/hen_enable.png",&stat));
 	//DPRINTF("HENPLUGIN->do_install_hen: %x\n",do_install_hen);
 	
 	// Default restore option check for use if HDD formatted game folder missing (3.3.1+)
-	hen_restore=(cellFsStat("/dev_hdd0/game/PS3XPLOIT/USRDIR/hen.installed",&stat));
-	DPRINTF("HENPLUGIN->hen_restore: %x\n",hen_restore);
+	//hen_restore=(cellFsStat("/dev_hdd0/game/PS3XPLOIT/USRDIR/hen.installed",&stat));
+	//DPRINTF("HENPLUGIN->hen_restore: %x\n",hen_restore);
 	
-	// Check for webMAN-MOD
+	/* Check for webMAN-MOD
 	if((cellFsStat("/dev_hdd0/plugins/webftp_server.sprx",&stat)==0) || (cellFsStat("/dev_hdd0/plugins/webftp_server_lite.sprx",&stat)==0))
 	{
 		is_wmm_installed=1;
 		DPRINTF("HENPLUGIN->WMM Detected\n");
 	}
-	
+
 	// Display message about the temporary disabling of boot plugins
 	// Created from payload if HEN is installing, so plugins cannot be loaded
 	if(cellFsStat("/dev_hdd0/tmp/installer.active",&stat)==0)
@@ -1847,7 +1848,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 		show_msg((char *)msg_boot_plugins);
 		cellFsUnlink("/dev_hdd0/tmp/installer.active");
 	}
-	
+*/	
 	//	do_update=(cellFsStat("/dev_flash/hen/toggles/hen_updater.off",&stat) ? hen_updater() : 0);// 20211011 Added update toggle thanks bucanero for original PR
 	do_update=0
 	
@@ -1858,7 +1859,7 @@ static void henplugin_thread(__attribute__((unused)) uint64_t arg)
 	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_signed.pkg");
 	cellFsUnlink("/dev_hdd0/Latest_HEN_Installer_WMM_signed.pkg");
 	
-	if((do_install_hen!=0) || (do_update==1) || hen_restore!=0)
+	/* if((do_install_hen!=0) || (do_update==1) || hen_restore!=0)
 	{
 		set_led("install_start");
 		close_browser_plugins();
@@ -1920,7 +1921,8 @@ done:
 	cellFsUnlink("/dev_hdd0/theme/PS3HEN.p3t");// Removing temp HEN installer
 	cellFsUnlink("/dev_hdd0/HENplugin.sprx");// Removing temp HEN Plugin SPRX
 	
-	done=1;
+done:
+
 	
 	DPRINTF("HENPLUGIN->Done! Preparing to exit thread\n");	
 	
@@ -1937,7 +1939,7 @@ done:
 		sys_timer_usleep(10000000);// Wait a few seconds
 		reboot_ps3();// Default Soft Reboot
 	}
-	
+*/
 	clear_web_cache_check();// Clear WebBrowser cache check (thanks xfrcc)
 	
 	show_notification(); // Show PS3 4K Pro variant info
